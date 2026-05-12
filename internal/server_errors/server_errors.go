@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-var ErrDBRecordNotFound = errors.New("Record Not Found!!!")
+var ErrDBRecordNotFound = errors.New("record not found")
 
 type ErrorDetail struct {
 	Field   string `json:"field"`
@@ -26,31 +26,31 @@ func NewServerErr(code int, message string) *ServerErr {
 	return &ServerErr{Code: code, Message: message}
 }
 
-func HandleValidationError(err error) (isFatal bool, errorBag []ErrorDetail) {
-	if err == nil {
-		return false, nil
-	}
+// func HandleValidationError(err error) (isFatal bool, errorBag []*ErrorDetail) {
+// 	if err == nil {
+// 		return false, nil
+// 	}
 
-	var invalidErr *validator.InvalidValidationError
-	if errors.As(err, &invalidErr) {
-		return true, nil
-	}
+// 	var invalidErr *validator.InvalidValidationError
+// 	if errors.As(err, &invalidErr) {
+// 		return true, nil
+// 	}
 
-	bag := ValErrToBag(err)
-	return false, bag
-}
+// 	bag := ValErrToBag(err)
+// 	return false, bag
+// }
 
-func ValErrToBag(err error) []ErrorDetail {
-	var validationErr, ok = err.(validator.ValidationErrors)
-	var errorBag = make([]ErrorDetail, 0)
+func ValErrToBag(err error) []*ErrorDetail {
+	validationErr, ok := err.(validator.ValidationErrors)
 	if !ok {
-		return errorBag
+		return nil
 	}
+	errorBag := make([]*ErrorDetail, len(validationErr))
 	for _, v := range validationErr {
 		field := v.Field()
 		message := v.Error()
 
-		error := ErrorDetail{
+		error := &ErrorDetail{
 			Field:   field,
 			Message: message,
 		}
