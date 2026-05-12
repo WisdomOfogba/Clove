@@ -1,0 +1,85 @@
+package response
+
+import (
+	server "github.com/chibx/vendor-pulse/internal/server_errors"
+
+	"github.com/gofiber/fiber/v3"
+)
+
+type structuredResponse struct {
+	Code    int    `json:"code,omitempty"`
+	Message string `json:"message,omitempty"`
+	Errors  any    `json:"errors,omitempty"`
+	Data    any    `json:"data,omitempty"`
+}
+
+func NewResponse(code int, message string, data ...any) *structuredResponse {
+	if code == 0 {
+		code = fiber.StatusOK
+	}
+
+	resp := &structuredResponse{
+		Code:    code,
+		Message: message,
+	}
+
+	if len(data) > 0 {
+		// If first data is a ErrorDetail, assume it's errors; else, it's Data
+		if errs, ok := data[0].([]*server.ErrorDetail); ok {
+			resp.Errors = errs
+		} else {
+			resp.Data = data[0]
+		}
+	}
+
+	return resp
+}
+
+func From(ctx fiber.Ctx, structured *structuredResponse) error {
+	if structured == nil {
+		return nil
+	}
+
+	if structured.Code != 0 {
+		ctx.Status(structured.Code)
+	}
+
+	return ctx.JSON(structured)
+}
+
+func WriteResponse(ctx fiber.Ctx, code int, message string, data ...any) error {
+	resp := structuredResponse{
+		Code:    code,
+		Message: message,
+	}
+
+	if len(data) > 0 {
+		// If first data is a ErrorDetail, assume it's errors; else, it's Data
+		if errs, ok := data[0].([]*server.ErrorDetail); ok {
+			resp.Errors = errs
+		} else {
+			resp.Data = data[0]
+		}
+	}
+
+	if code != 0 {
+		ctx.Status(code)
+	} else {
+		ctx.Status(fiber.StatusOK)
+	}
+
+	return ctx.JSON(resp)
+}
+
+func FromFiberError(ctx fiber.Ctx, err *fiber.Error, data ...any) error {
+	resp := structuredResponse{
+		Code:    err.Code,
+		Message: err.Message,
+	}
+
+	if len(data) > 0 {
+		resp.Data = data[0]
+	}
+
+	return ctx.Status(err.Code).JSON(resp)
+}
