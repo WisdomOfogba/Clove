@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/chibx/vendor-pulse/internal/utils"
-	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -16,11 +15,11 @@ import (
 )
 
 var (
-	Logger     = initLogger()
-	Validator  = validator.New(validator.WithRequiredStructEnabled())
-	DB         *pgxpool.Pool
-	Redis      *redis.Client
-	Cloudinary *cloudinary.Cloudinary
+	Logger    = initLogger()
+	Validator = validator.New(validator.WithRequiredStructEnabled())
+	DB        *pgxpool.Pool
+	Redis     *redis.Client
+	// Cloudinary *cloudinary.Cloudinary
 )
 
 func TagNameFunc(fld reflect.StructField) string {
@@ -74,18 +73,18 @@ func newDB() *pgxpool.Pool {
 	return nil
 }
 
-func newCloudinary() *cloudinary.Cloudinary {
-	cldKey := getEnv("CLOUDINARY_KEY")
-	cldSecret := getEnv("CLOUDINARY_SECRET")
-	cldName := getEnv("CLOUDINARY_CLOUD_NAME")
-	cld, err := cloudinary.NewFromParams(cldName, cldKey, cldSecret)
-	if err != nil {
-		Logger.Error().Err(err).Msg("failed to initialize cloudinary for catalog service")
-		Logger.Fatal().Msg("Error setting up Cloudinary!!!")
-	}
+// func newCloudinary() *cloudinary.Cloudinary {
+// 	cldKey := getEnv("CLOUDINARY_KEY")
+// 	cldSecret := getEnv("CLOUDINARY_SECRET")
+// 	cldName := getEnv("CLOUDINARY_CLOUD_NAME")
+// 	cld, err := cloudinary.NewFromParams(cldName, cldKey, cldSecret)
+// 	if err != nil {
+// 		Logger.Error().Err(err).Msg("failed to initialize cloudinary for catalog service")
+// 		Logger.Fatal().Msg("Error setting up Cloudinary!!!")
+// 	}
 
-	return cld
-}
+// 	return cld
+// }
 
 func newRedis() *redis.Client {
 	redisUrl := getEnv("REDIS_URL")
@@ -124,9 +123,9 @@ func InitGlobals() {
 		Redis = newRedis()
 	})
 
-	wg.Go(func() {
-		Cloudinary = newCloudinary()
-	})
+	// wg.Go(func() {
+	// 	Cloudinary = newCloudinary()
+	// })
 
 	wg.Wait()
 }
