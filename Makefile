@@ -1,4 +1,4 @@
-SERVER_DIR = "././local"
+SERVER_DIR = "./.local"
 
 .PHONY: build-server
 build:

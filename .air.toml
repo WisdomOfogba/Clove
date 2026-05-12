@@ -9,7 +9,7 @@ tmp_dir = "bin"
 [build]
 args_bin = []
 bin = "./bin/server"
-cmd = "go build -o ./bin/server ././local"
+cmd = "go build -o ./bin/server ./.local"
 delay = 1000
 entrypoint = ["./bin/server"]
 exclude_dir = ["dist", "assets", "bin", "vendor", "testdata"]
