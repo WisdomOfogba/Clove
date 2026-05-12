@@ -15,6 +15,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/adaptor"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/helmet"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -75,6 +77,12 @@ func getApp() *fiber.App {
 		StructValidator:         &structValidator{validate: global.Validator},
 	})
 
+	app.Hooks().OnPostShutdown(func(e error) error {
+		global.DB.Close()
+		err := global.Redis.Close()
+		return err
+	})
+
 	app.Get("/readyz", func(c fiber.Ctx) error {
 		if isShuttingDown.Load() {
 			return c.SendStatus(fiber.StatusServiceUnavailable)
@@ -82,11 +90,17 @@ func getApp() *fiber.App {
 		return c.SendStatus(fiber.StatusOK)
 	})
 
-	app.Hooks().OnPostShutdown(func(e error) error {
-		global.DB.Close()
-		err := global.Redis.Close()
-		return err
-	})
+	app.Use(helmet.New(helmet.Config{
+		HSTSMaxAge:         63072000, // 2 years in seconds
+		HSTSPreloadEnabled: true,
+	}))
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: []string{""},
+		AllowMethods: []string{""},
+		AllowHeaders: []string{""},
+		MaxAge:       3600,
+	}))
 
 	routes.AddRoutes(app)
 
