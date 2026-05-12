@@ -45,7 +45,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Begin graceful shutdown
 	isShuttingDown.Store(true)
-	time.Sleep(5 * time.Second) // Let Loadbalancer drain
+	time.Sleep(3 * time.Second) // Let Loadbalancer drain
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
