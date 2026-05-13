@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 // ==================== VENDOR CORE ====================
 
@@ -13,7 +17,7 @@ type Business struct {
 }
 
 type Vendor struct {
-	VendorID     string    `json:"vendor_id"`
+	VendorID     int64     `json:"vendor_id"`
 	FullName     string    `json:"full_name"`
 	Email        string    `json:"email"`
 	Phone        string    `json:"phone"`
@@ -34,7 +38,7 @@ type Vendor struct {
 // VendorDocument represents documents submitted for verification
 type VendorDocument struct {
 	DocumentID         string     `json:"document_id"`
-	VendorID           string     `json:"vendor_id"`
+	VendorID           int64      `json:"vendor_id"`
 	DocumentType       string     `json:"document_type"` // "cac_certificate", "valid_id", "bank_details", "business_photo", "product_photo", "exterior_photo", "selfie_photo"
 	DocumentName       string     `json:"document_name"`
 	FilePath           string     `json:"file_path"`
@@ -49,7 +53,7 @@ type VendorDocument struct {
 // VendorKYC stores personal KYC data for vendor
 type VendorKYC struct {
 	KYCID            string    `json:"kyc_id"`
-	VendorID         string    `json:"vendor_id"`
+	VendorID         int64     `json:"vendor_id"`
 	NINNumber        string    `json:"nin_number"`
 	BVNNumber        string    `json:"bvn_number"`
 	BankName         string    `json:"bank_name"`
@@ -67,9 +71,9 @@ type VendorKYC struct {
 // VendorVerification represents the main verification record with AI scoring
 type VendorVerification struct {
 	VerificationID   string     `json:"verification_id"`
-	VendorID         string     `json:"vendor_id"`
-	TrustScore       int        `json:"trust_score"`    // 0-100, updated based on interactions
-	InitialScore     int        `json:"initial_score"`  // Initial score granted after registration
+	VendorID         int64      `json:"vendor_id"`
+	TrustScore       float64    `json:"trust_score"`    // 0-100, updated based on interactions
+	InitialScore     float64    `json:"initial_score"`  // Initial score granted after registration
 	Verdict          string     `json:"verdict"`        // "approved", "restricted", "flagged"
 	BreakdownJSON    string     `json:"breakdown_json"` // JSON-encoded breakdown
 	Flags            string     `json:"flags"`          // JSON-encoded array
@@ -87,7 +91,7 @@ type VendorVerification struct {
 // VerificationJob tracks async verification processing
 type VerificationJob struct {
 	JobID            string    `json:"job_id"`
-	VendorID         string    `json:"vendor_id"`
+	VendorID         int64     `json:"vendor_id"`
 	Status           string    `json:"status"`       // "pending", "processing", "complete", "failed"
 	CurrentStep      string    `json:"current_step"` // "cac_check", "nin_check", "image_analysis", "score_fusion"
 	StepsJSON        string    `json:"steps_json"`   // JSON-encoded step statuses
@@ -102,23 +106,23 @@ type VerificationJob struct {
 
 // PaymentTransaction tracks verification fee payments
 type PaymentTransaction struct {
-	TransactionID       string    `json:"transaction_id"`
-	VendorID            string    `json:"vendor_id"`
-	TransactionRef      string    `json:"transaction_ref"`
-	Amount              int64     `json:"amount"`           // in kobo
-	Currency            string    `json:"currency"`         // "NGN"
-	Status              string    `json:"status"`           // "pending", "success", "failed"
-	TransactionType     string    `json:"transaction_type"` // "verification_fee", "payout"
-	SquadCheckoutURL    *string   `json:"squad_checkout_url,omitempty"`
-	SquadTransactionRef *string   `json:"squad_transaction_ref,omitempty"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
+	TransactionID       string          `json:"transaction_id"`
+	VendorID            int64           `json:"vendor_id"`
+	TransactionRef      string          `json:"transaction_ref"`
+	Amount              decimal.Decimal `json:"amount"`           // in kobo
+	Currency            string          `json:"currency"`         // "NGN"
+	Status              string          `json:"status"`           // "pending", "success", "failed"
+	TransactionType     string          `json:"transaction_type"` // "verification_fee", "payout"
+	SquadCheckoutURL    *string         `json:"squad_checkout_url,omitempty"`
+	SquadTransactionRef *string         `json:"squad_transaction_ref,omitempty"`
+	CreatedAt           time.Time       `json:"created_at"`
+	UpdatedAt           time.Time       `json:"updated_at"`
 }
 
 // VendorVirtualAccount stores Squad virtual account details
 type VendorVirtualAccount struct {
 	VirtualAccountID     string    `json:"virtual_account_id"`
-	VendorID             string    `json:"vendor_id"`
+	VendorID             int64     `json:"vendor_id"`
 	VirtualAccountNumber string    `json:"virtual_account_number"`
 	BankName             string    `json:"bank_name"`
 	CustomerIdentifier   string    `json:"customer_identifier"`
@@ -127,37 +131,11 @@ type VendorVirtualAccount struct {
 	UpdatedAt            time.Time `json:"updated_at"`
 }
 
-// ==================== CUSTOMER RATINGS & FEEDBACK ====================
-
-// CustomerRating represents customer ratings for vendors
-type CustomerRating struct {
-	RatingID   string    `json:"rating_id"`
-	VendorID   string    `json:"vendor_id"`
-	CustomerID *string   `json:"customer_id,omitempty"`
-	OrderID    *string   `json:"order_id,omitempty"`
-	Rating     int       `json:"rating"`
-	Comment    *string   `json:"comment,omitempty"`
-	CreatedAt  time.Time `json:"created_at"`
-}
-
-// CustomerComment represents customer comments/reviews
-type CustomerComment struct {
-	CommentID      string    `json:"comment_id"`
-	VendorID       string    `json:"vendor_id"`
-	CustomerID     *string   `json:"customer_id,omitempty"`
-	OrderID        *string   `json:"order_id,omitempty"`
-	Comment        string    `json:"comment"`
-	Sentiment      string    `json:"sentiment"`
-	SentimentScore float64   `json:"sentiment_score"`
-	IsVerified     bool      `json:"is_verified"`
-	CreatedAt      time.Time `json:"created_at"`
-}
-
 // ==================== ADMIN & USERS ====================
 
 // AdminUser represents admin staff
 type AdminUser struct {
-	AdminID   string    `json:"admin_id"`
+	AdminID   int64     `json:"admin_id"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
 	Name      string    `json:"name"`
@@ -172,7 +150,7 @@ type AdminUser struct {
 // VendorMetrics stores aggregated metrics for a vendor
 type VendorMetrics struct {
 	MetricsID            string    `json:"metrics_id"`
-	VendorID             string    `json:"vendor_id"`
+	VendorID             int64     `json:"vendor_id"`
 	TotalRatings         int       `json:"total_ratings"`
 	AverageRating        float64   `json:"average_rating"`
 	TotalComments        int       `json:"total_comments"`
