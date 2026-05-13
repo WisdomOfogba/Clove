@@ -12,6 +12,8 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
+// var allowedEndpoints = []string{"/api/auth/signup", "/api/auth/login", "/api/auth/logout"}
+
 func AuthMiddleware(c fiber.Ctx) error {
 	// var tokenErr error
 	// authHeader := strings.TrimSpace(c.Get("Authorization"))
@@ -40,9 +42,12 @@ func AuthMiddleware(c fiber.Ctx) error {
 }
 
 func HardenBackendEndpoint(c fiber.Ctx) error {
+	newUrl := strings.TrimSuffix(c.Path(), "/")
+
 	backendUser, ok := c.Locals(constants.UserCtxKey).(*request.UserCtx)
 
-	if !ok || backendUser == nil {
+	if (!ok || backendUser == nil) && strings.HasPrefix(newUrl, "/api/auth") {
+		/*!slices.Contains(allowedEndpoints, newUrl)*/
 		return response.FromFiberError(c, fiber.ErrUnauthorized, "You need to login.")
 	}
 
