@@ -2,24 +2,31 @@ package global
 
 import (
 	"context"
+	"encoding/base64"
 	"os"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/chibx/vendor-pulse/internal/utils"
+	"github.com/bwmarrin/snowflake"
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
+	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
+	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
 )
 
 var (
-	Logger    = initLogger()
-	Validator = validator.New(validator.WithRequiredStructEnabled())
-	DB        *pgxpool.Pool
-	Redis     *redis.Client
-	// Cloudinary *cloudinary.Cloudinary
+	Logger     = initLogger()
+	Validator  = validator.New(validator.WithRequiredStructEnabled())
+	DB         *pgxpool.Pool
+	Redis      *redis.Client
+	SecretKey  []byte
+	SnowFlake  *snowflake.Node
+	Cloudinary *cloudinary.Cloudinary
 )
 
 func TagNameFunc(fld reflect.StructField) string {
@@ -28,6 +35,10 @@ func TagNameFunc(fld reflect.StructField) string {
 		return fld.Name
 	}
 	return name
+}
+
+func asPointer[T any](a T) *T {
+	return &a
 }
 
 func getEnv(env string, sub ...string) string {
@@ -41,6 +52,17 @@ func getEnv(env string, sub ...string) string {
 	return val
 }
 
+func loadKey(keyEnv string) []byte {
+	keyBase64 := getEnv(keyEnv)
+
+	var err error
+	key, err := base64.StdEncoding.DecodeString(keyBase64)
+	if err != nil {
+		Logger.Fatal().Err(err).Str("secret_key", keyEnv).Msg("Invalid Secret Key")
+	}
+	return key
+}
+
 func initLogger() *zerolog.Logger {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	enableDebug := getEnv("DEBUG", "0")
@@ -48,7 +70,7 @@ func initLogger() *zerolog.Logger {
 		// Disable debug logging
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
-	return utils.AsPointer(zerolog.New(os.Stdout))
+	return asPointer(zerolog.New(os.Stdout))
 }
 
 func newDB() *pgxpool.Pool {
@@ -58,6 +80,11 @@ func newDB() *pgxpool.Pool {
 
 	for range 5 {
 		db, err = pgxpool.New(context.Background(), dbUrl)
+		db.Config().AfterConnect = func(_ context.Context, conn *pgx.Conn) error {
+			pgxdecimal.Register(conn.TypeMap())
+			pgxUUID.Register(conn.TypeMap())
+			return nil
+		}
 
 		if err != nil {
 			Logger.Error().Err(err).Msg("failed to initialize db conn for catalog service")
@@ -73,18 +100,18 @@ func newDB() *pgxpool.Pool {
 	return nil
 }
 
-// func newCloudinary() *cloudinary.Cloudinary {
-// 	cldKey := getEnv("CLOUDINARY_KEY")
-// 	cldSecret := getEnv("CLOUDINARY_SECRET")
-// 	cldName := getEnv("CLOUDINARY_CLOUD_NAME")
-// 	cld, err := cloudinary.NewFromParams(cldName, cldKey, cldSecret)
-// 	if err != nil {
-// 		Logger.Error().Err(err).Msg("failed to initialize cloudinary for catalog service")
-// 		Logger.Fatal().Msg("Error setting up Cloudinary!!!")
-// 	}
+func newCloudinary() *cloudinary.Cloudinary {
+	cldKey := getEnv("CLOUDINARY_KEY")
+	cldSecret := getEnv("CLOUDINARY_SECRET")
+	cldName := getEnv("CLOUDINARY_CLOUD_NAME")
+	cld, err := cloudinary.NewFromParams(cldName, cldKey, cldSecret)
+	if err != nil {
+		Logger.Error().Err(err).Msg("failed to initialize cloudinary for catalog service")
+		Logger.Fatal().Msg("Error setting up Cloudinary!!!")
+	}
 
-// 	return cld
-// }
+	return cld
+}
 
 func newRedis() *redis.Client {
 	redisUrl := getEnv("REDIS_URL")
@@ -115,7 +142,13 @@ func newRedis() *redis.Client {
 
 func InitGlobals() {
 	Validator.RegisterTagNameFunc(TagNameFunc)
+	var err error
 	var wg sync.WaitGroup
+	SecretKey = loadKey("SECRET_KEY")
+	SnowFlake, err = snowflake.NewNode(1)
+	if err != nil {
+		Logger.Fatal().Err(err).Send()
+	}
 	wg.Go(func() {
 		DB = newDB()
 	})
@@ -123,9 +156,9 @@ func InitGlobals() {
 		Redis = newRedis()
 	})
 
-	// wg.Go(func() {
-	// 	Cloudinary = newCloudinary()
-	// })
+	wg.Go(func() {
+		Cloudinary = newCloudinary()
+	})
 
 	wg.Wait()
 }
