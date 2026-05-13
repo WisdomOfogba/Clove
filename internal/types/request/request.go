@@ -55,14 +55,14 @@ type ProofOfLifeRequest struct {
 
 // InitiateVerificationFeeRequest initiates ₦1,000 Squad verification fee payment
 type InitiateVerificationFeeRequest struct {
-	VendorID string `form:"vendor_id" json:"vendor_id" name:"Vendor ID"`
+	VendorID int64 `form:"vendor_id" json:"vendor_id" name:"Vendor ID"`
 }
 
 // ==================== VERIFICATION PROCESSING ====================
 
 // TriggerVerificationRequest triggers async AI verification pipeline
 type TriggerVerificationRequest struct {
-	VendorID string `form:"vendor_id" json:"vendor_id" name:"Vendor ID"`
+	VendorID int64 `form:"vendor_id" json:"vendor_id" name:"Vendor ID"`
 }
 
 // ==================== ADMIN ====================
