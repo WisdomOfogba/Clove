@@ -10,27 +10,19 @@ import (
 
 // Vendor represents a business/vendor in the system
 type Business struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	TIN      string `json:"tin"`
-}
-
-type Vendor struct {
-	VendorID     int64     `json:"vendor_id"`
-	FullName     string    `json:"full_name"`
+	BusinessID   int64     `json:"business_id"`
+	Name         string    `json:"name"`
 	Email        string    `json:"email"`
-	Phone        string    `json:"phone"`
 	Password     string    `json:"password"`
-	BusinessName string    `json:"business_name"`
+	TIN          string    `json:"tin"`
 	BusinessType string    `json:"business_type"` // "restaurant", "ecommerce", "food_delivery"
 	RCNumber     string    `json:"rc_number"`     // CAC/RC number
 	BVN          string    `json:"bvn"`           // Unique BVN for one store per vendor
 	State        string    `json:"state"`
 	Address      string    `json:"address"`
 	Status       string    `json:"status"` // "pending_documents", "documents_received", "payment_pending", "processing", "approved", "restricted", "flagged", "suspended"
+	VendorID     int64     `json:"vendor_id"`
 	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 // ==================== DOCUMENTS & KYC ====================

@@ -16,19 +16,19 @@ type User struct {
 	Password        string    `json:"password"`
 	Status          string    `json:"status"` // "active", "suspended"
 	IsEmailVerified bool      `json:"is_email_verified"`
+	IsBusiness      bool      `json:"is_business"` // default: false
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type UserSession struct {
-	UserId int64 `gorm:"not null" redis:"user_id"`
-	// UserId           uint         `gorm:"not null" redis:"user_id"`
-	RefreshTokenHash string    `gorm:"not null" redis:"-"`
-	LastIP           string    `gorm:"" redis:"last_ip"`
-	DeviceId         uuid.UUID `gorm:"" redis:"device_id"`
-	UserAgent        string    `gorm:"not null" redis:"user_agent"`
-	CreatedAt        time.Time `gorm:"not null" redis:"created_at"`
-	ExpiresAt        time.Time `gorm:"not null" redis:"created_at"`
+	UserId           int64     `json:"user_id"`
+	RefreshTokenHash string    `json:"-"`
+	LastIP           string    `json:"last_ip"`
+	DeviceId         uuid.UUID `json:"device_id"`
+	UserAgent        string    `json:"user_agent"`
+	CreatedAt        time.Time `json:"created_at"`
+	ExpiresAt        time.Time `json:"expires_at"`
 }
 
 type UserAddress struct {

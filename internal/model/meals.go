@@ -36,7 +36,7 @@ type MealPicture struct {
 // Order represents a customer order
 type Order struct {
 	ID              string          `json:"order_id"`
-	UserID          int64           `json:"user_id"`
+	CustomerID      int64           `json:"customer_id"`
 	VendorID        int64           `json:"vendor_id"`
 	Status          string          `json:"status"`       // "pending", "confirmed", "preparing", "ready", "delivered", "cancelled"
 	TotalAmount     decimal.Decimal `json:"total_amount"` // in kobo
@@ -48,7 +48,7 @@ type Order struct {
 
 // OrderItem represents items in an order
 type OrderItem struct {
-	ID        int16           `json:"id"`
+	ID        int64           `json:"id"`
 	OrderID   string          `json:"order_id"`
 	MealID    int64           `json:"meal_id"`
 	Quantity  int             `json:"quantity"`
@@ -61,7 +61,7 @@ type OrderItem struct {
 // Review represents customer review for a meal/order (only buyers can review)
 type Review struct {
 	ID             int64     `json:"id"`
-	UserID         int64     `json:"user_id"`
+	CustomerID     int64     `json:"customer_id"`
 	VendorID       int64     `json:"vendor_id"`
 	MealID         int64     `json:"meal_id"`
 	Rating         int64     `json:"rating"` // 1-5
