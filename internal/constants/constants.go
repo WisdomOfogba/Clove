@@ -7,6 +7,8 @@ import (
 	"github.com/go-redis/redis_rate/v10"
 )
 
+const APPNAME = "CloveDelight"
+
 var PublicFolder = func() string {
 	if folder := os.Getenv("PUBLIC_FOLDER"); folder != "" {
 		return folder
@@ -27,6 +29,11 @@ var (
 		Period: time.Minute,
 		Burst:  200,
 	}
+)
+
+const (
+	USER_ACTIVE    = "active"
+	USER_SUSPENDED = "suspended"
 )
 
 // Max allowed image size in bytes i.e 5MB
