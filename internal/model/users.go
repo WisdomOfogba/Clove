@@ -9,16 +9,16 @@ import (
 
 // User represents a customer/user in the system
 type User struct {
-	ID              int64     `json:"user_id"`
-	FullName        string    `json:"full_name"`
-	Email           string    `json:"email"`
-	PhoneNumber     string    `json:"phone"`
-	Password        string    `json:"password"`
-	Status          string    `json:"status"` // "active", "suspended"
-	IsEmailVerified bool      `json:"is_email_verified"`
-	IsBusiness      bool      `json:"is_business"` // default: false
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	ID              int64     `json:"user_id" gorm:"column:id;primaryKey"`
+	FullName        string    `json:"full_name" gorm:"column:full_name;not null"`
+	Email           string    `json:"email" gorm:"column:email;not null;unique;index:idx_users_email"`
+	PhoneNumber     string    `json:"phone" gorm:"column:phone_number;not null"`
+	Password        string    `json:"password" gorm:"column:password;not null"`
+	Status          string    `json:"status" gorm:"column:status;not null;default:'active'"` // "active", "suspended"
+	IsEmailVerified bool      `json:"is_email_verified" gorm:"column:is_email_verified;not null;default:false"`
+	IsBusiness      bool      `json:"is_business" gorm:"column:is_business;not null;default:false;index:idx_users_is_business"` // default: false
+	CreatedAt       time.Time `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt       time.Time `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 type UserSession struct {

@@ -10,130 +10,130 @@ import (
 
 // Vendor represents a business/vendor in the system
 type Business struct {
-	BusinessID   int64     `json:"business_id"`
-	Name         string    `json:"name"`
-	Email        string    `json:"email"`
-	Password     string    `json:"password"`
-	TIN          string    `json:"tin"`
-	BusinessType string    `json:"business_type"` // "restaurant", "ecommerce", "food_delivery"
-	RCNumber     string    `json:"rc_number"`     // CAC/RC number
-	NIN          string    `json:"nin"`           // Unique NIN for one store per vendor
-	State        string    `json:"state"`
-	Address      string    `json:"address"`
-	Status       string    `json:"status"` // "pending_documents", "documents_received", "payment_pending", "processing", "approved", "restricted", "flagged", "suspended"
-	VendorID     int64     `json:"vendor_id"`
-	CreatedAt    time.Time `json:"created_at"`
+	BusinessID   int64     `json:"business_id" gorm:"column:business_id;primaryKey"`
+	Name         string    `json:"name" gorm:"column:name;not null"`
+	Email        string    `json:"email" gorm:"column:email;not null"`
+	Password     string    `json:"password" gorm:"column:password;not null"`
+	TIN          string    `json:"tin" gorm:"column:tin;not null"`
+	NIN          string    `json:"nin" gorm:"column:nin;not null;unique"`
+	BusinessType string    `json:"business_type" gorm:"column:business_type;not null"` // "restaurant", "ecommerce", "food_delivery"
+	RCNumber     string    `json:"rc_number" gorm:"column:rc_number;not null"`         // CAC/RC number
+	State        string    `json:"state" gorm:"column:state;not null"`
+	Address      string    `json:"address" gorm:"column:address;not null"`
+	Status       string    `json:"status" gorm:"column:status;not null"` // "pending_documents", "documents_received", "payment_pending", "processing", "approved", "restricted", "flagged", "suspended"
+	VendorID     int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_business_vendor_id"`
+	CreatedAt    time.Time `json:"created_at" gorm:"column:created_at;not null;default:CURRENT_TIMESTAMP"`
 }
 
 // ==================== DOCUMENTS & KYC ====================
 
 // VendorDocument represents documents submitted for verification
 type VendorDocument struct {
-	DocumentID         string     `json:"document_id"`
-	VendorID           int64      `json:"vendor_id"`
-	DocumentType       string     `json:"document_type"` // "cac_certificate", "valid_id", "bank_details", "business_photo", "product_photo", "exterior_photo", "selfie_photo"
-	DocumentName       string     `json:"document_name"`
-	FilePath           string     `json:"file_path"`
-	VerificationStatus string     `json:"verification_status"` // "pending", "verified", "rejected"
-	VerifiedBy         *string    `json:"verified_by,omitempty"`
-	VerifiedAt         *time.Time `json:"verified_at,omitempty"`
-	ExpiryDate         *time.Time `json:"expiry_date,omitempty"`
-	CreatedAt          time.Time  `json:"created_at"`
-	UpdatedAt          time.Time  `json:"updated_at"`
+	DocumentID         string     `json:"document_id" gorm:"column:document_id;primaryKey"`
+	VendorID           int64      `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_vendor_documents_vendor_id"`
+	DocumentType       string     `json:"document_type" gorm:"column:document_type;not null"` // "cac_certificate", "valid_id", "bank_details", "business_photo", "product_photo", "exterior_photo", "selfie_photo"
+	DocumentName       string     `json:"document_name" gorm:"column:document_name;not null"`
+	FilePath           string     `json:"file_path" gorm:"column:file_path;not null"`
+	VerificationStatus string     `json:"verification_status" gorm:"column:verification_status;not null;default:'pending'"` // "pending", "verified", "rejected"
+	VerifiedBy         *string    `json:"verified_by,omitempty" gorm:"column:verified_by"`
+	VerifiedAt         *time.Time `json:"verified_at,omitempty" gorm:"column:verified_at"`
+	ExpiryDate         *time.Time `json:"expiry_date,omitempty" gorm:"column:expiry_date"`
+	CreatedAt          time.Time  `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt          time.Time  `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // VendorKYC stores personal KYC data for vendor
 type VendorKYC struct {
-	KYCID            string    `json:"kyc_id"`
-	VendorID         int64     `json:"vendor_id"`
-	NINNumber        string    `json:"nin_number"`
-	BankName         string    `json:"bank_name"`
-	AccountNumber    string    `json:"account_number"`
-	AccountName      string    `json:"account_name"`
-	Latitude         *float64  `json:"latitude,omitempty"`
-	Longitude        *float64  `json:"longitude,omitempty"`
-	LocationAccuracy *float64  `json:"location_accuracy,omitempty"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	KYCID            string    `json:"kyc_id" gorm:"column:kyc_id;primaryKey"`
+	VendorID         int64     `json:"vendor_id" gorm:"column:vendor_id;not null"`
+	NINNumber        string    `json:"nin_number" gorm:"column:nin_number;not null"`
+	BankName         string    `json:"bank_name" gorm:"column:bank_name;not null"`
+	AccountNumber    string    `json:"account_number" gorm:"column:account_number;not null"`
+	AccountName      string    `json:"account_name" gorm:"column:account_name;not null"`
+	Latitude         *float64  `json:"latitude,omitempty" gorm:"column:latitude"`
+	Longitude        *float64  `json:"longitude,omitempty" gorm:"column:longitude"`
+	LocationAccuracy *float64  `json:"location_accuracy,omitempty" gorm:"column:location_accuracy"`
+	CreatedAt        time.Time `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt        time.Time `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // ==================== VERIFICATION & SCORING ====================
 
 // VendorVerification represents the main verification record with AI scoring
 type VendorVerification struct {
-	VerificationID   string     `json:"verification_id"`
-	VendorID         int64      `json:"vendor_id"`
-	TrustScore       float64    `json:"trust_score"`    // 0-100, updated based on interactions
-	InitialScore     float64    `json:"initial_score"`  // Initial score granted after registration
-	Verdict          string     `json:"verdict"`        // "approved", "restricted", "flagged"
-	BreakdownJSON    string     `json:"breakdown_json"` // JSON-encoded breakdown
-	Flags            string     `json:"flags"`          // JSON-encoded array
-	VerdictReason    string     `json:"verdict_reason"`
-	ValidationStatus string     `json:"validation_status"` // "pending", "processing", "complete", "failed"
-	JobID            string     `json:"job_id,omitempty"`
-	ValidatedBy      *string    `json:"validated_by,omitempty"`
-	ValidatedAt      *time.Time `json:"validated_at,omitempty"`
-	AdminNote        *string    `json:"admin_note,omitempty"`
-	AdminDecision    *string    `json:"admin_decision,omitempty"`
-	CreatedAt        time.Time  `json:"created_at"`
-	UpdatedAt        time.Time  `json:"updated_at"`
+	VerificationID   string     `json:"verification_id" gorm:"column:verification_id;primaryKey"`
+	VendorID         int64      `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_vendor_verifications_vendor_id"`
+	TrustScore       float64    `json:"trust_score" gorm:"column:trust_score;not null;default:0"`    // 0-100, updated based on interactions
+	InitialScore     float64    `json:"initial_score" gorm:"column:initial_score;not null;default:0"` // Initial score granted after registration
+	Verdict          string     `json:"verdict" gorm:"column:verdict;not null"`                      // "approved", "restricted", "flagged"
+	BreakdownJSON    string     `json:"breakdown_json" gorm:"column:breakdown_json;type:jsonb"`      // JSON-encoded breakdown
+	Flags            string     `json:"flags" gorm:"column:flags;type:jsonb"`                        // JSON-encoded array
+	VerdictReason    string     `json:"verdict_reason" gorm:"column:verdict_reason"`
+	ValidationStatus string     `json:"validation_status" gorm:"column:validation_status;not null;default:'pending'"` // "pending", "processing", "complete", "failed"
+	JobID            string     `json:"job_id,omitempty" gorm:"column:job_id"`
+	ValidatedBy      *string    `json:"validated_by,omitempty" gorm:"column:validated_by"`
+	ValidatedAt      *time.Time `json:"validated_at,omitempty" gorm:"column:validated_at"`
+	AdminNote        *string    `json:"admin_note,omitempty" gorm:"column:admin_note"`
+	AdminDecision    *string    `json:"admin_decision,omitempty" gorm:"column:admin_decision"`
+	CreatedAt        time.Time  `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt        time.Time  `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // VerificationJob tracks async verification processing
 type VerificationJob struct {
-	JobID            string    `json:"job_id"`
-	VendorID         int64     `json:"vendor_id"`
-	Status           string    `json:"status"`       // "pending", "processing", "complete", "failed"
-	CurrentStep      string    `json:"current_step"` // "cac_check", "nin_check", "image_analysis", "score_fusion"
-	StepsJSON        string    `json:"steps_json"`   // JSON-encoded step statuses
-	ErrorMessage     *string   `json:"error_message,omitempty"`
-	Result           *string   `json:"result,omitempty"`
-	EstimatedSeconds int       `json:"estimated_seconds"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	JobID            string    `json:"job_id" gorm:"column:job_id;primaryKey"`
+	VendorID         int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_verification_jobs_vendor_id"`
+	Status           string    `json:"status" gorm:"column:status;not null;default:'pending'"`       // "pending", "processing", "complete", "failed"
+	CurrentStep      string    `json:"current_step" gorm:"column:current_step"`                     // "cac_check", "nin_check", "image_analysis", "score_fusion"
+	StepsJSON        string    `json:"steps_json" gorm:"column:steps_json;type:jsonb"`              // JSON-encoded step statuses
+	ErrorMessage     *string   `json:"error_message,omitempty" gorm:"column:error_message"`
+	Result           *string   `json:"result,omitempty" gorm:"column:result"`
+	EstimatedSeconds int       `json:"estimated_seconds" gorm:"column:estimated_seconds;not null;default:0"`
+	CreatedAt        time.Time `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt        time.Time `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // ==================== PAYMENT & TRANSACTIONS ====================
 
 // PaymentTransaction tracks verification fee payments
 type PaymentTransaction struct {
-	TransactionID       string          `json:"transaction_id"`
-	VendorID            int64           `json:"vendor_id"`
-	TransactionRef      string          `json:"transaction_ref"`
-	Amount              decimal.Decimal `json:"amount"`           // in kobo
-	Currency            string          `json:"currency"`         // "NGN"
-	Status              string          `json:"status"`           // "pending", "success", "failed"
-	TransactionType     string          `json:"transaction_type"` // "verification_fee", "payout"
-	SquadCheckoutURL    *string         `json:"squad_checkout_url,omitempty"`
-	SquadTransactionRef *string         `json:"squad_transaction_ref,omitempty"`
-	CreatedAt           time.Time       `json:"created_at"`
-	UpdatedAt           time.Time       `json:"updated_at"`
+	TransactionID       string          `json:"transaction_id" gorm:"column:transaction_id;primaryKey"`
+	VendorID            int64           `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_payment_transactions_vendor_id"`
+	TransactionRef      string          `json:"transaction_ref" gorm:"column:transaction_ref;not null;index:idx_payment_transactions_transaction_ref"`
+	Amount              decimal.Decimal `json:"amount" gorm:"column:amount;not null"`           // in kobo
+	Currency            string          `json:"currency" gorm:"column:currency;not null;default:'NGN'"`         // "NGN"
+	Status              string          `json:"status" gorm:"column:status;not null;default:'pending'"`           // "pending", "success", "failed"
+	TransactionType     string          `json:"transaction_type" gorm:"column:transaction_type;not null"` // "verification_fee", "payout"
+	SquadCheckoutURL    *string         `json:"squad_checkout_url,omitempty" gorm:"column:squad_checkout_url"`
+	SquadTransactionRef *string         `json:"squad_transaction_ref,omitempty" gorm:"column:squad_transaction_ref"`
+	CreatedAt           time.Time       `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt           time.Time       `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // VendorVirtualAccount stores Squad virtual account details
 type VendorVirtualAccount struct {
-	VirtualAccountID     string    `json:"virtual_account_id"`
-	VendorID             int64     `json:"vendor_id"`
-	VirtualAccountNumber string    `json:"virtual_account_number"`
-	BankName             string    `json:"bank_name"`
-	CustomerIdentifier   string    `json:"customer_identifier"`
-	Status               string    `json:"status"`
-	CreatedAt            time.Time `json:"created_at"`
-	UpdatedAt            time.Time `json:"updated_at"`
+	VirtualAccountID     string    `json:"virtual_account_id" gorm:"column:virtual_account_id;primaryKey"`
+	VendorID             int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_vendor_virtual_accounts_vendor_id"`
+	VirtualAccountNumber string    `json:"virtual_account_number" gorm:"column:virtual_account_number;not null"`
+	BankName             string    `json:"bank_name" gorm:"column:bank_name;not null"`
+	CustomerIdentifier   string    `json:"customer_identifier" gorm:"column:customer_identifier;not null"`
+	Status               string    `json:"status" gorm:"column:status;not null"`
+	CreatedAt            time.Time `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt            time.Time `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // ==================== ADMIN & USERS ====================
 
 // AdminUser represents admin staff
 type AdminUser struct {
-	AdminID   int64     `json:"admin_id"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	Name      string    `json:"name"`
-	Role      string    `json:"role"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	AdminID   int64     `json:"admin_id" gorm:"column:admin_id;primaryKey"`
+	Email     string    `json:"email" gorm:"column:email;not null;unique;index:idx_admin_users_email"`
+	Password  string    `json:"password" gorm:"column:password;not null"`
+	Name      string    `json:"name" gorm:"column:name;not null"`
+	Role      string    `json:"role" gorm:"column:role;not null"`
+	Status    string    `json:"status" gorm:"column:status;not null"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:created_at;not null"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at;not null"`
 }
 
 // ==================== METRICS & ANALYTICS ====================
