@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type squadClient struct {
+type Client struct {
 	apiKey     string
 	httpclient *http.Client
 	baseURL    string
@@ -18,11 +18,11 @@ type SquadOption struct {
 	HTTPClient *http.Client
 }
 
-func NewSquadClient(opt SquadOption) (*squadClient, error) {
+func NewSquadClient(opt SquadOption) (*Client, error) {
 	if len(opt.ApiKey) == 0 {
 		return nil, errors.New("squadco api key is missing")
 	}
-	client := &squadClient{
+	client := &Client{
 		apiKey:     opt.ApiKey,
 		baseURL:    baseURLSandbox,
 		httpclient: http.DefaultClient,

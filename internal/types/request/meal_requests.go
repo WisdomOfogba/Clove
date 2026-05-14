@@ -17,10 +17,11 @@ type CreateMealRequest struct {
 // UpdateMealRequest represents updating an existing meal
 type UpdateMealRequest struct {
 	Name        string          `form:"name" json:"name" name:"Meal Name" validate:"required"`
-	Description string          `form:"description" json:"description" name:"Description" validate:"required,gte=20,lte=500"`
+	Description string          `form:"description" json:"description" name:"Description" validate:"required,gte=20,lte=1000"`
 	Price       decimal.Decimal `form:"price" json:"price" name:"Price" validate:"required"`
 	Category    string          `form:"category" json:"category" name:"Category"`
 	Status      string          `form:"status" json:"status" name:"Status"`
+	Enabled     bool            `form:"enabled" json:"enabled" name:"Enabled"`
 }
 
 // UploadMealPicturesRequest represents uploading pictures for a meal

@@ -17,7 +17,7 @@ const (
 
 // SetEnvironment sets the API environment (sandbox or live)
 // If useProduction is true, live API is used; otherwise sandbox is used
-func (sc *squadClient) SetEnvironment(useProduction bool) {
+func (sc *Client) SetEnvironment(useProduction bool) {
 	if useProduction {
 		sc.baseURL = baseURLLive
 		return
@@ -28,12 +28,12 @@ func (sc *squadClient) SetEnvironment(useProduction bool) {
 // ==================== INTERNAL HELPER METHODS ====================
 
 // buildURL constructs the full URL for an endpoint
-func (sc *squadClient) buildURL(baseURL, endpoint string) string {
+func (sc *Client) buildURL(baseURL, endpoint string) string {
 	return fmt.Sprintf("%s%s", baseURL, endpoint)
 }
 
 // sendRequest sends an HTTP request to the Squad API
-func (sc *squadClient) sendRequest(method, endpoint string, payload any) (*http.Response, error) {
+func (sc *Client) sendRequest(method, endpoint string, payload any) (*http.Response, error) {
 	url := sc.buildURL(sc.baseURL, endpoint)
 
 	var body io.Reader
@@ -64,7 +64,7 @@ func (sc *squadClient) sendRequest(method, endpoint string, payload any) (*http.
 }
 
 // sendQueryRequest sends an HTTP GET request with query parameters
-func (sc *squadClient) sendQueryRequest(endpoint string, params map[string]string) (*http.Response, error) {
+func (sc *Client) sendQueryRequest(endpoint string, params map[string]string) (*http.Response, error) {
 	requestUrl := sc.buildURL(sc.baseURL, endpoint)
 
 	// Add query parameters
@@ -129,7 +129,7 @@ func decodeResponse(resp *http.Response, v any) error {
 // ==================== PAYMENT INITIATION METHODS ====================
 
 // InitiatePayment initiates a payment transaction and returns a checkout URL
-func (sc *squadClient) InitiatePayment(req *InitiatePaymentRequest) (*InitiatePaymentResponse, error) {
+func (sc *Client) InitiatePayment(req *InitiatePaymentRequest) (*InitiatePaymentResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -168,7 +168,7 @@ func (sc *squadClient) InitiatePayment(req *InitiatePaymentRequest) (*InitiatePa
 }
 
 // ChargeCard charges a previously tokenized card
-func (sc *squadClient) ChargeCard(req *ChargeCardRequest) (*ChargeCardResponse, error) {
+func (sc *Client) ChargeCard(req *ChargeCardRequest) (*ChargeCardResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -199,7 +199,7 @@ func (sc *squadClient) ChargeCard(req *ChargeCardRequest) (*ChargeCardResponse, 
 }
 
 // SimulateTransferPayment simulates a payment into a virtual account (for testing)
-func (sc *squadClient) SimulateTransferPayment(req *SimulateTransferPaymentRequest) (*SimulateTransferPaymentResponse, error) {
+func (sc *Client) SimulateTransferPayment(req *SimulateTransferPaymentRequest) (*SimulateTransferPaymentResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -230,7 +230,7 @@ func (sc *squadClient) SimulateTransferPayment(req *SimulateTransferPaymentReque
 }
 
 // CancelRecurringCharge cancels previously tokenized card(s)
-func (sc *squadClient) CancelRecurringCharge(req *CancelRecurringRequest) (*CancelRecurringResponse, error) {
+func (sc *Client) CancelRecurringCharge(req *CancelRecurringRequest) (*CancelRecurringResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -259,7 +259,7 @@ func (sc *squadClient) CancelRecurringCharge(req *CancelRecurringRequest) (*Canc
 // ==================== TRANSACTION VERIFICATION METHODS ====================
 
 // VerifyTransaction verifies the status of a transaction using its reference
-func (sc *squadClient) VerifyTransaction(transactionRef string) (*VerifyTransactionResponse, error) {
+func (sc *Client) VerifyTransaction(transactionRef string) (*VerifyTransactionResponse, error) {
 	if transactionRef == "" {
 		return nil, fmt.Errorf("transaction_ref is required")
 	}
@@ -284,7 +284,7 @@ func (sc *squadClient) VerifyTransaction(transactionRef string) (*VerifyTransact
 }
 
 // QueryAllTransactions retrieves all transactions within a date range
-func (sc *squadClient) QueryAllTransactions(startDate, endDate string, options map[string]any) (*QueryTransactionsResponse, error) {
+func (sc *Client) QueryAllTransactions(startDate, endDate string, options map[string]any) (*QueryTransactionsResponse, error) {
 	if startDate == "" || endDate == "" {
 		return nil, fmt.Errorf("start_date and end_date are required")
 	}
@@ -329,7 +329,7 @@ func (sc *squadClient) QueryAllTransactions(startDate, endDate string, options m
 // ==================== TRANSFER API METHODS ====================
 
 // LookupBankAccount verifies that a bank account belongs to the recipient
-func (sc *squadClient) LookupBankAccount(req *LookupBankAccountRequest) (*LookupBankAccountResponse, error) {
+func (sc *Client) LookupBankAccount(req *LookupBankAccountRequest) (*LookupBankAccountResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -360,7 +360,7 @@ func (sc *squadClient) LookupBankAccount(req *LookupBankAccountRequest) (*Lookup
 }
 
 // InitiateTransfer initiates a transfer from Squad wallet to a bank account
-func (sc *squadClient) InitiateTransfer(req *InitiateTransferRequest) (*InitiateTransferResponse, error) {
+func (sc *Client) InitiateTransfer(req *InitiateTransferRequest) (*InitiateTransferResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -407,7 +407,7 @@ func (sc *squadClient) InitiateTransfer(req *InitiateTransferRequest) (*Initiate
 }
 
 // RequeryTransfer checks the status of a transfer
-func (sc *squadClient) RequeryTransfer(transactionRef string) (*RequeryTransferResponse, error) {
+func (sc *Client) RequeryTransfer(transactionRef string) (*RequeryTransferResponse, error) {
 	if transactionRef == "" {
 		return nil, fmt.Errorf("transaction_reference is required")
 	}
@@ -434,7 +434,7 @@ func (sc *squadClient) RequeryTransfer(transactionRef string) (*RequeryTransferR
 }
 
 // GetAllTransfers retrieves all transfers made from the Squad wallet
-func (sc *squadClient) GetAllTransfers(page, perPage int, sortOrder string) (*GetAllTransfersResponse, error) {
+func (sc *Client) GetAllTransfers(page, perPage int, sortOrder string) (*GetAllTransfersResponse, error) {
 	params := make(map[string]string)
 
 	if page > 0 {
@@ -467,7 +467,7 @@ func (sc *squadClient) GetAllTransfers(page, perPage int, sortOrder string) (*Ge
 }
 
 // CreateDynamicVirtualAccount creates a dynamic virtual account within the merchant pool
-func (sc *squadClient) CreateDynamicVirtualAccount(req *CreateDynamicVirtualAccountRequest) (*CreateDynamicVirtualAccountResponse, error) {
+func (sc *Client) CreateDynamicVirtualAccount(req *CreateDynamicVirtualAccountRequest) (*CreateDynamicVirtualAccountResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -490,7 +490,7 @@ func (sc *squadClient) CreateDynamicVirtualAccount(req *CreateDynamicVirtualAcco
 }
 
 // InitiateDynamicVirtualAccount initiates a dynamic virtual account transaction
-func (sc *squadClient) InitiateDynamicVirtualAccount(req *InitiateDynamicVirtualAccountRequest) (*InitiateDynamicVirtualAccountResponse, error) {
+func (sc *Client) InitiateDynamicVirtualAccount(req *InitiateDynamicVirtualAccountRequest) (*InitiateDynamicVirtualAccountResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -529,7 +529,7 @@ func (sc *squadClient) InitiateDynamicVirtualAccount(req *InitiateDynamicVirtual
 }
 
 // RequeryDynamicVirtualAccount retrieves transaction attempts for a dynamic virtual account reference
-func (sc *squadClient) RequeryDynamicVirtualAccount(transactionRef string) (*DynamicVirtualAccountTransactionsResponse, error) {
+func (sc *Client) RequeryDynamicVirtualAccount(transactionRef string) (*DynamicVirtualAccountTransactionsResponse, error) {
 	if transactionRef == "" {
 		return nil, fmt.Errorf("transaction_reference is required")
 	}
@@ -553,7 +553,7 @@ func (sc *squadClient) RequeryDynamicVirtualAccount(transactionRef string) (*Dyn
 }
 
 // UpdateDynamicVirtualAccount updates amount or duration for an existing dynamic virtual account transaction
-func (sc *squadClient) UpdateDynamicVirtualAccount(req *UpdateDynamicVirtualAccountRequest) (*UpdateDynamicVirtualAccountResponse, error) {
+func (sc *Client) UpdateDynamicVirtualAccount(req *UpdateDynamicVirtualAccountRequest) (*UpdateDynamicVirtualAccountResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -584,7 +584,7 @@ func (sc *squadClient) UpdateDynamicVirtualAccount(req *UpdateDynamicVirtualAcco
 }
 
 // SimulateDynamicVirtualAccountPayment simulates a dynamic virtual account payment in sandbox
-func (sc *squadClient) SimulateDynamicVirtualAccountPayment(req *SimulateDynamicVirtualAccountPaymentRequest) (*SimulateTransferPaymentResponse, error) {
+func (sc *Client) SimulateDynamicVirtualAccountPayment(req *SimulateDynamicVirtualAccountPaymentRequest) (*SimulateTransferPaymentResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -615,7 +615,7 @@ func (sc *squadClient) SimulateDynamicVirtualAccountPayment(req *SimulateDynamic
 }
 
 // VerifyPOSTransaction verifies a POS transaction by transaction reference
-func (sc *squadClient) VerifyPOSTransaction(transactionRef string) (*VerifyTransactionResponse, error) {
+func (sc *Client) VerifyPOSTransaction(transactionRef string) (*VerifyTransactionResponse, error) {
 	if transactionRef == "" {
 		return nil, fmt.Errorf("transaction_ref is required")
 	}
@@ -641,7 +641,7 @@ func (sc *squadClient) VerifyPOSTransaction(transactionRef string) (*VerifyTrans
 // ==================== REFUND API METHODS ====================
 
 // RefundTransaction initiates a refund for a successful transaction
-func (sc *squadClient) RefundTransaction(req *RefundRequest) (*RefundResponse, error) {
+func (sc *Client) RefundTransaction(req *RefundRequest) (*RefundResponse, error) {
 	if req == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -690,7 +690,7 @@ func (sc *squadClient) RefundTransaction(req *RefundRequest) (*RefundResponse, e
 // ==================== BALANCE METHODS ====================
 
 // GetLedgerBalance retrieves the current balance in the Squad wallet
-func (sc *squadClient) GetLedgerBalance(currencyID string) (*LedgerBalanceResponse, error) {
+func (sc *Client) GetLedgerBalance(currencyID string) (*LedgerBalanceResponse, error) {
 	if currencyID == "" {
 		currencyID = "NGN"
 	}

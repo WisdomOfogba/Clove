@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/chibx/vendor-pulse/internal/squadco"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
 	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
@@ -18,16 +19,19 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/shopspring/decimal"
 	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
+	"google.golang.org/genai"
 )
 
 var (
-	Logger     = initLogger()
-	Validator  = validator.New(validator.WithRequiredStructEnabled())
-	DB         *pgxpool.Pool
-	Redis      *redis.Client
-	SecretKey  []byte
-	SnowFlake  *snowflake.Node
-	Cloudinary *cloudinary.Cloudinary
+	Logger      = initLogger()
+	Validator   = validator.New(validator.WithRequiredStructEnabled())
+	DB          *pgxpool.Pool
+	Redis       *redis.Client
+	SecretKey   []byte
+	SnowFlake   *snowflake.Node
+	Cloudinary  *cloudinary.Cloudinary
+	AIClient    *genai.Client
+	SquadClient *squadco.Client
 )
 
 func decimalCustomTypeFunc(field reflect.Value) interface{} {
@@ -79,6 +83,34 @@ func initLogger() *zerolog.Logger {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 	return asPointer(zerolog.New(os.Stdout))
+}
+
+func initGenAI(ctx context.Context) {
+	apiKey := getEnv("GEN_AI_KEY")
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:  apiKey,
+		Backend: genai.BackendGeminiAPI,
+	})
+	if err != nil {
+		Logger.Fatal().Err(err).Msg("Could not create Gen AI client")
+		return
+	}
+
+	AIClient = client
+}
+
+func initSquadClient() {
+	apiKey := getEnv("SQUAD_API_KEY")
+	isProduction := getEnv("IS_SQUAD_PROD", "0") == "1"
+	client, err := squadco.NewSquadClient(squadco.SquadOption{
+		ApiKey: apiKey,
+	})
+	if err != nil {
+		Logger.Fatal().Err(err).Msg("Could not create squadco client")
+		return
+	}
+	client.SetEnvironment(isProduction)
+	SquadClient = client
 }
 
 func newDB() *pgxpool.Pool {
@@ -169,5 +201,11 @@ func InitGlobals() {
 		Cloudinary = newCloudinary()
 	})
 
+	wg.Go(func() {
+		initGenAI(context.Background())
+	})
+
 	wg.Wait()
+
+	initSquadClient()
 }

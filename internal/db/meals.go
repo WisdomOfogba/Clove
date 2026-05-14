@@ -150,7 +150,7 @@ func (m *mealsRepo) DeleteMealPictures(ctx context.Context, vendorID, mealID int
 		for _, v := range pictureIDs {
 			arr.Int64(v)
 		}
-		event.Array("picture_ids", arr).Int64("meal_id", mealID)
+		event.Array("picture_ids", arr).Int64("meal_id", mealID).Msg("Couldn't delete meal images")
 		return fmt.Errorf("delete meal pictures: %w", err)
 	}
 
@@ -163,7 +163,7 @@ func (m *mealsRepo) DeleteMealPictures(ctx context.Context, vendorID, mealID int
 }
 
 func (m *mealsRepo) UpdateMeal(ctx context.Context, vendorID, mealID int64, update *request.UpdateMealRequest) error {
-	query := `UPDATE meals SET name = @name, description = @description, price = @price, category = @category, status = @status, updated_at = @updatedAt
+	query := `UPDATE meals SET name = @name, enabled = @enabled, description = @description, price = @price, category = @category, status = @status, updated_at = @updatedAt
 	WHERE id = @mealId AND vendor_id = @vendorId`
 
 	args := pgx.NamedArgs{
@@ -175,6 +175,7 @@ func (m *mealsRepo) UpdateMeal(ctx context.Context, vendorID, mealID int64, upda
 		"updatedAt":   time.Now(),
 		"mealId":      mealID,
 		"vendorId":    vendorID,
+		"enabled":     update.Enabled,
 	}
 
 	result, err := m.db.Exec(ctx, query, args)
