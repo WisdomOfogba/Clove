@@ -127,6 +127,7 @@ func CreateMeal() fiber.Handler {
 			Price:       reqBody.Price.IntPart(),
 			Category:    reqBody.Category,
 			Status:      "active",
+			Enabled:     reqBody.Enabled,
 		}
 
 		mealID, err := db.Meals().CreateMeal(ctx.Context(), meal, uploadedPictures)

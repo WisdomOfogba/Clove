@@ -10,6 +10,7 @@ type CreateMealRequest struct {
 	Description string          `form:"description" json:"description" name:"Description"`
 	Price       decimal.Decimal `form:"price" json:"price" name:"Price"` // in kobo
 	Category    string          `form:"category" json:"category" name:"Category"`
+	Enabled     bool            `form:"enabled" json:"enabled" name:"Enabled"`
 	// files is the form field for the image files
 }
 
@@ -74,7 +75,6 @@ type EditReviewRequest struct {
 	Rating   int16  `json:"rating" name:"Rating" validate:"required,gte=0,lte=5"` // 1-5
 	Comment  string `json:"comment" name:"Comment"`
 }
-
 
 // ==================== SEARCH & DISCOVERY ====================
 

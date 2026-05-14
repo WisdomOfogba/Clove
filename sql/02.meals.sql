@@ -7,6 +7,7 @@ CREATE TABLE meals (
     name TEXT NOT NULL,
     description TEXT,
     price BIGINT NOT NULL,  -- in kobo
+    enabled BOOL DEFAULT FALSE,
     category TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'active',
     score DOUBLE PRECISION NOT NULL DEFAULT 0,

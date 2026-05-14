@@ -14,7 +14,8 @@ type Meal struct {
 	VendorID    int64     `json:"vendor_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Price       int64     `json:"price"`    // in kobo
+	Price       int64     `json:"price"` // in kobo
+	Enabled     bool      `json:"enabled"`
 	Category    string    `json:"category"` // "main_course", "appetizer", "dessert", "beverage"
 	Status      string    `json:"status"`   // "active", "inactive"
 	Score       float64   `json:"score"`
