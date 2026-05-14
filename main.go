@@ -53,23 +53,23 @@ func getApp() *fiber.App {
 func main() {
 	global.InitGlobals()
 	app := getApp()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 	/*
 			mux := http.NewServeMux()
 		  mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		    fmt.Fprintln(w, "Hello from Go on Vercel")
 		  })
 
-		  port := os.Getenv("PORT")
-		  if port == "" {
-		    port = "3000"
-		  }
 
 		  log.Fatal(http.ListenAndServe(":"+port, mux))
 	*/
 
 	go func() {
-		if err := app.Listen(":3000"); err != nil {
-			log.Printf("Listen error: %v", err)
+		if err := app.Listen(":" + port); err != nil {
+			log.Printf("Listen error on port %s: %v", port, err)
 		}
 	}()
 
@@ -82,7 +82,7 @@ func main() {
 	isShuttingDown.Store(true)
 	time.Sleep(1 * time.Second) // Let Loadbalancer drain
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	done := make(chan error, 1)
