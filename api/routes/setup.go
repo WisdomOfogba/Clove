@@ -2,13 +2,16 @@ package routes
 
 import (
 	"fmt"
+	"io/fs"
 	"mime/multipart"
 	"net/http"
 	"slices"
 
 	"github.com/chibx/vendor-pulse/api/middlewares"
 	"github.com/chibx/vendor-pulse/internal/global"
+	"github.com/chibx/vendor-pulse/output"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/static"
 )
 
 var logger = global.Logger
@@ -62,10 +65,8 @@ func AddRoutes(app *fiber.App) {
 	api.Post("/review/edit", EditReview())
 	api.Get("/meal/:id/review", ListReviews())
 
-	app.Get("*", func(ctx fiber.Ctx) error {
-		return ctx.JSON(fiber.Map{
-			"uri":  ctx.Request().URI().String(),
-			"path": ctx.Path(),
-		})
-	})
+	sub, _ := fs.Sub(output.EmbedFS, "dist")
+	app.Get("/*", static.New("", static.Config{
+		FS: sub,
+	}))
 }
