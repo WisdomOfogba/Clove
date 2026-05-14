@@ -2,15 +2,15 @@ package db
 
 import (
 	"github.com/chibx/vendor-pulse/internal/global"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"gorm.io/gorm"
 )
 
 type (
-	usersRepo    struct{ db *pgxpool.Pool }
-	mealsRepo    struct{ db *pgxpool.Pool }
-	ordersRepo   struct{ db *pgxpool.Pool }
-	paymentsRepo struct{ db *pgxpool.Pool }
-	pulseRepo    struct{ db *pgxpool.Pool }
+	usersRepo    struct{ db *gorm.DB }
+	mealsRepo    struct{ db *gorm.DB }
+	ordersRepo   struct{ db *gorm.DB }
+	paymentsRepo struct{ db *gorm.DB }
+	pulseRepo    struct{ db *gorm.DB }
 )
 
 var (

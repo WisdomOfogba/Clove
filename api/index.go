@@ -79,7 +79,7 @@ func getApp() *fiber.App {
 	})
 
 	app.Hooks().OnPostShutdown(func(e error) error {
-		global.DB.Close()
+		// global.DB.Close()
 		err := global.Redis.Close()
 		return err
 	})

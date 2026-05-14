@@ -12,20 +12,18 @@ import (
 	"github.com/chibx/vendor-pulse/internal/squadco"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
-	pgxdecimal "github.com/jackc/pgx-shopspring-decimal"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 	"github.com/shopspring/decimal"
-	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
 	"google.golang.org/genai"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 var (
 	Logger      = initLogger()
 	Validator   = validator.New(validator.WithRequiredStructEnabled())
-	DB          *pgxpool.Pool
+	DB          *gorm.DB
 	Redis       *redis.Client
 	SecretKey   []byte
 	SnowFlake   *snowflake.Node
@@ -113,26 +111,20 @@ func initSquadClient() {
 	SquadClient = client
 }
 
-func newDB() *pgxpool.Pool {
-	dbUrl := getEnv("DATABASE_URL")
-	var db *pgxpool.Pool
+func newDB() *gorm.DB {
+	dbUrl := getEnv("DATABASE_DSN")
+	var db *gorm.DB
 	var err error
 
 	for range 5 {
-		db, err = pgxpool.New(context.Background(), dbUrl)
-		db.Config().AfterConnect = func(_ context.Context, conn *pgx.Conn) error {
-			pgxdecimal.Register(conn.TypeMap())
-			pgxUUID.Register(conn.TypeMap())
-			return nil
-		}
-
+		db, err = gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 		if err != nil {
 			Logger.Error().Err(err).Msg("failed to initialize db conn for catalog service")
 		} else {
 			return db
 		}
 
-		Logger.Debug().Msg("Backing off for 2 seconds...")
+		Logger.Debug().Msg("Backing off for 100ms...")
 		time.Sleep(100 * time.Millisecond)
 	}
 
@@ -172,7 +164,7 @@ func newRedis() *redis.Client {
 			return client
 		}
 
-		Logger.Debug().Msg("Backing off for 2 seconds...")
+		Logger.Debug().Msg("Backing off for 100ms...")
 		time.Sleep(100 * time.Millisecond)
 	}
 

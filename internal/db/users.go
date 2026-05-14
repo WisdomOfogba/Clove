@@ -9,27 +9,17 @@ import (
 	"github.com/chibx/vendor-pulse/internal/dto"
 	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/chibx/vendor-pulse/internal/model"
-	"github.com/jackc/pgx/v5"
 )
 
 func (cust *usersRepo) CreateUser(ctx context.Context, user *model.User) error {
-	query := `INSERT INTO users (id, full_name, email, phone_number, password, status, is_email_verified, created_at, updated_at) 
-	VALUES (@id, @fullName, @email, @phoneNumber, @password, @status, @emailVerified, @createdAt, @updatedAt);`
+	user.ID = global.SnowFlake.Generate().Int64()
+	user.Status = constants.USER_ACTIVE
+	user.IsEmailVerified = true
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 
-	args := pgx.NamedArgs{
-		"id":            global.SnowFlake.Generate().Int64(),
-		"fullName":      user.FullName,
-		"email":         user.Email,
-		"phoneNumber":   user.PhoneNumber,
-		"password":      user.Password,
-		"status":        constants.USER_ACTIVE,
-		"emailVerified": true,
-		"createdAt":     time.Now(),
-		"updatedAt":     time.Now(),
-	}
-	_, err := cust.db.Exec(ctx, query, args)
-	if err != nil {
-		return fmt.Errorf("unable to insert row: %w", err)
+	if err := cust.db.WithContext(ctx).Create(user).Error; err != nil {
+		return fmt.Errorf("unable to insert user: %w", err)
 	}
 
 	return nil
@@ -38,9 +28,7 @@ func (cust *usersRepo) CreateUser(ctx context.Context, user *model.User) error {
 func (cust *usersRepo) GetUserLoginByEmail(ctx context.Context, email string) (*dto.UserLogin, error) {
 	user := &dto.UserLogin{}
 
-	query := `SELECT id, email, password FROM users WHERE email = $1 LIMIT 1;`
-	err := cust.db.QueryRow(ctx, query, email).Scan(&user.ID, &user.Email, &user.Password)
-	if err != nil {
+	if err := cust.db.WithContext(ctx).Select("id", "email", "password").Where("email = ?", email).First(user).Error; err != nil {
 		return nil, err
 	}
 
@@ -48,47 +36,25 @@ func (cust *usersRepo) GetUserLoginByEmail(ctx context.Context, email string) (*
 }
 
 func (cust *usersRepo) CreateSession(ctx context.Context, session *model.UserSession) error {
-	query := `INSERT INTO user_sessions (user_id, refresh_token_hash, last_ip, device_id, user_agent, created_at, expires_at) 
-	VALUES (@userId, @tokenHash, @lastIP, @deviceId, @userAgent, createdAt, expiresAt)`
-	args := pgx.NamedArgs{
-		"userId":    session.UserId,
-		"tokenHash": session.RefreshTokenHash,
-		"lastIP":    session.LastIP,
-		"deviceId":  session.DeviceId,
-		"userAgent": session.UserAgent,
-		"createdAt": time.Now(),
-		"expiresAt": session.ExpiresAt,
+	session.CreatedAt = time.Now()
+	if err := cust.db.WithContext(ctx).Create(session).Error; err != nil {
+		return err
 	}
-	_, err := cust.db.Exec(ctx, query, args)
-	return err
+	return nil
 }
 
 func (cust *usersRepo) GetSessionByTokenHash(ctx context.Context, tokenHash string) (*model.UserSession, error) {
 	userSession := &model.UserSession{}
-	query := `SELECT user_id, refresh_token_hash, last_ip, device_id, user_agent, created_at, expires_at FROM user_sessions 
-	WHERE refresh_token_hash = $1 LIMIT 1`
-	err := cust.db.QueryRow(ctx, query, tokenHash).Scan(
-		&userSession.UserId,
-		&userSession.RefreshTokenHash,
-		&userSession.LastIP,
-		&userSession.DeviceId,
-		&userSession.UserAgent,
-		&userSession.CreatedAt,
-		&userSession.ExpiresAt,
-	)
-	if err != nil {
+	if err := cust.db.WithContext(ctx).Where("refresh_token_hash = ?", tokenHash).First(userSession).Error; err != nil {
 		return nil, err
 	}
 	return userSession, nil
 }
 
 func (cust *usersRepo) DeleteSession(ctx context.Context, session *model.UserSession) error {
-	query := `DELETE FROM user_sessions WHERE refresh_token_hash = $1`
-	args := []any{session.RefreshTokenHash}
+	query := cust.db.WithContext(ctx).Where("refresh_token_hash = ?", session.RefreshTokenHash)
 	if session.UserId != 0 {
-		query = query + ` AND user_id = $2`
-		args = append(args, session.UserId)
+		query = query.Where("user_id = ?", session.UserId)
 	}
-	_, err := cust.db.Exec(ctx, query, args)
-	return err
+	return query.Delete(&model.UserSession{}).Error
 }

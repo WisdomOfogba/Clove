@@ -157,15 +157,15 @@ type VendorMetrics struct {
 
 // PlatformMetrics tracks overall platform analytics
 type PlatformMetrics struct {
-	MetricsID           string    `json:"metrics_id"`
-	TotalVendors        int       `json:"total_vendors"`
-	ApprovedVendors     int       `json:"approved_vendors"`
-	RestrictedVendors   int       `json:"restricted_vendors"`
-	FlaggedVendors      int       `json:"flagged_vendors"`
-	PendingManualReview int       `json:"pending_manual_review"`
-	AvgTrustScore       float64   `json:"avg_trust_score"`
-	FraudAttempts       int       `json:"fraud_attempts"`
-	TotalOrders         int       `json:"total_orders"`
-	TotalRevenue        int64     `json:"total_revenue"`
-	LastUpdated         time.Time `json:"last_updated"`
+	MetricsID           string    `json:"metrics_id" gorm:"column:metrics_id;primaryKey"`
+	TotalVendors        int       `json:"total_vendors" gorm:"column:total_vendors;not null;default:0"`
+	ApprovedVendors     int       `json:"approved_vendors" gorm:"column:approved_vendors;not null;default:0"`
+	RestrictedVendors   int       `json:"restricted_vendors" gorm:"column:restricted_vendors;not null;default:0"`
+	FlaggedVendors      int       `json:"flagged_vendors" gorm:"column:flagged_vendors;not null;default:0"`
+	PendingManualReview int       `json:"pending_manual_review" gorm:"column:pending_manual_review;not null;default:0"`
+	AvgTrustScore       float64   `json:"avg_trust_score" gorm:"column:avg_trust_score;not null;default:0"`
+	FraudAttempts       int       `json:"fraud_attempts" gorm:"column:fraud_attempts;not null;default:0"`
+	TotalOrders         int       `json:"total_orders" gorm:"column:total_orders;not null;default:0"`
+	TotalRevenue        int64     `json:"total_revenue" gorm:"column:total_revenue;not null;default:0"`
+	LastUpdated         time.Time `json:"last_updated" gorm:"column:last_updated;not null"`
 }
