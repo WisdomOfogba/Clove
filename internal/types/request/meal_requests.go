@@ -46,6 +46,10 @@ type PlaceOrderRequest struct {
 	DeliveryAddress string       `json:"delivery_address" name:"Delivery Address" validate:"required,gte=10"`
 }
 
+type MakePaymentRequest struct {
+	OrderID string `json:"order_id"`
+}
+
 // OrderItem represents an item in the order
 type OrderItem struct {
 	MealID   int64 `json:"meal_id" name:"Meal ID" validate:"required,gte=1"`
