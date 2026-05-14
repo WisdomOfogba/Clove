@@ -3,11 +3,13 @@ package db
 import (
 	"context"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/chibx/vendor-pulse/internal/model"
 	server "github.com/chibx/vendor-pulse/internal/server_errors"
+	"github.com/chibx/vendor-pulse/internal/types"
 	"github.com/chibx/vendor-pulse/internal/types/request"
 	"github.com/jackc/pgx/v5"
 )
@@ -308,4 +310,47 @@ func (m *mealsRepo) EditReview(ctx context.Context, reviewId int64, customerId i
 	}
 
 	return nil
+}
+
+func (m *mealsRepo) ListReviews(ctx context.Context, mealId int64, pagination types.Pagination) ([]*model.Review, error) {
+	pagination.Normalize()
+	reviews := make([]*model.Review, 0, 10)
+
+	query := `SELECT id, customer_id, rating, comment, edits, created_at, updated_at 
+	WHERE meal_id = @mealID
+	FROM reviews LIMIT @limit OFFSET @offset`
+
+	args := pgx.NamedArgs{
+		"mealId": mealId,
+		"limit":  pagination.PageSize,
+		"offset": pagination.Page * pagination.Page,
+	}
+
+	rows, err := m.db.Query(ctx, query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		review := &model.Review{}
+		err = rows.Scan(
+			&review.ID, &review.CustomerID, &review.Rating,
+			&review.Comment, &review.Edits, &review.CreatedAt, &review.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scan error: %v", err)
+		}
+		if cap(reviews) <= len(reviews)+1 {
+			reviews = slices.Grow(reviews, int(float64(cap(reviews))*1.8))
+		}
+		reviews = append(reviews, review)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, fmt.Errorf("rows error: %v", err)
+	}
+
+	return reviews, nil
 }

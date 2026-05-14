@@ -91,24 +91,22 @@ type OrderListResponse struct {
 
 // ==================== REVIEW RESPONSES ====================
 
-// ReviewResponse represents a review
-type ReviewResponse struct {
-	ReviewID   string    `json:"review_id"`
-	OrderID    string    `json:"order_id"`
-	CustomerID string    `json:"customer_id"`
-	VendorID   string    `json:"vendor_id"`
-	MealID     string    `json:"meal_id"`
-	Rating     int       `json:"rating"`
-	Comment    string    `json:"comment"`
-	CreatedAt  time.Time `json:"created_at"`
+// MealReviewResponse represents a review
+type MealReviewResponse struct {
+	ReviewID  int64    `json:"review_id"`
+	IsOwner   bool      `json:"is_owner"` // if the review belongs to the current logged in customer
+	CanEdit   bool      `json:"can_edit"` // if the the comment belongs to the logged in customer and the model.Review.Edits is less than or equal to 5
+	Rating    int       `json:"rating"`
+	Comment   string    `json:"comment"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// ReviewListResponse represents list of reviews for a meal/vendor
-type ReviewListResponse struct {
-	Reviews       []*ReviewResponse `json:"reviews"`
-	Total         int               `json:"total"`
-	AverageRating float64           `json:"average_rating"`
-	Page          int               `json:"page"`
+// ListMealReviewResponse represents list of reviews for a meal/vendor
+type ListMealReviewResponse struct {
+	Reviews []*MealReviewResponse `json:"reviews"`
+	Total   int                   `json:"total"`
+	Page    int                   `json:"page"`
 }
 
 // ==================== VENDOR MENU RESPONSES ====================
