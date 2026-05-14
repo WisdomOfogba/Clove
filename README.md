@@ -32,3 +32,4 @@ Clove provides a **Dynamic Trust Score** for vendors by combining:
 
 * **[Chibx](https://github.com/chibx/)** – Lead Backend / Systems Architect
 * **[Wisdom Ofogba](https://github.com/WisdomOfogba/)** – Frontend Engineer / UI/UX
+* **[Oreoluwa Lasisi](https://github.com/vee234o)** - Project Manager
