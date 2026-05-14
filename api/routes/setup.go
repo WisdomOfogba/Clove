@@ -40,10 +40,11 @@ func validateFileType(file *multipart.FileHeader, allowed []string) error {
 
 func AddRoutes(app *fiber.App) {
 	api := app.Group("/api", middlewares.EnsureDeviceIDIsSet, middlewares.AuthMiddleware, middlewares.HardenBackendEndpoint)
-	customerAuth := api.Group("/auth")
-	customerAuth.Post("/signup", UserRegister())
-	customerAuth.Post("/login", UserLogin())
-	customerAuth.Post("/logout", UserLogout())
+	auth := api.Group("/auth")
+	auth.Get("/get-identity",GetUserIdentity())
+	auth.Post("/signup", UserRegister())
+	auth.Post("/login", UserLogin())
+	auth.Post("/logout", UserLogout())
 	api.Post("/promote-account", UpgradeToBusinessAccount())
 
 	// -------------------MEAL------------------------------
@@ -55,6 +56,10 @@ func AddRoutes(app *fiber.App) {
 	// -------------------ORDER-------------------------------
 	api.Post("/place-order", PlaceOrder())
 	api.Post("/cancel-order", CancelOrder())
+
+	// --------------------REVIEWS----------------------------
+	api.Post("/meal/:id/review", AddReview())
+	api.Post("/review/edit", EditReview())
 
 	app.Get("*", func(ctx fiber.Ctx) error {
 		return ctx.JSON(fiber.Map{

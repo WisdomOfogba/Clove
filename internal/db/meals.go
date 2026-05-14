@@ -7,6 +7,7 @@ import (
 
 	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/chibx/vendor-pulse/internal/model"
+	server "github.com/chibx/vendor-pulse/internal/server_errors"
 	"github.com/chibx/vendor-pulse/internal/types/request"
 	"github.com/jackc/pgx/v5"
 )
@@ -227,4 +228,84 @@ func (m *mealsRepo) GetMealPicturesByMealID(ctx context.Context, vendorID, mealI
 	}
 
 	return pictures, nil
+}
+
+func (m *mealsRepo) AddReview(ctx context.Context, mealId int64, review *model.Review) error {
+	// Validate that the meal exists and vendor_id matches
+	var exists bool
+	err := m.db.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM meals WHERE id = $1 AND vendor_id = $2)", mealId, review.VendorID).Scan(&exists)
+	if err != nil {
+		return fmt.Errorf("validate meal and vendor: %w", err)
+	}
+	if !exists {
+		return fmt.Errorf("meal not found or vendor mismatch")
+	}
+
+	now := time.Now()
+	review.ID = global.SnowFlake.Generate().Int64()
+	review.CreatedAt = now
+	review.UpdatedAt = now
+
+	query := `INSERT INTO reviews (id, customer_id, vendor_id, meal_id, rating, comment, edits, sentiment, sentiment_score, created_at, updated_at)
+	VALUES (@id, @customerId, @vendorId, @mealId, @rating, @comment, @edits, @sentiment, @sentimentScore, @createdAt, @updatedAt)`
+
+	args := pgx.NamedArgs{
+		"id":             review.ID,
+		"customerId":     review.CustomerID,
+		"vendorId":       review.VendorID,
+		"mealId":         review.MealID,
+		"rating":         review.Rating,
+		"comment":        review.Comment,
+		"edits":          review.Edits,
+		"sentiment":      review.Sentiment,
+		"sentimentScore": review.SentimentScore,
+		"createdAt":      review.CreatedAt,
+		"updatedAt":      review.UpdatedAt,
+	}
+
+	_, err = m.db.Exec(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("insert review: %w", err)
+	}
+
+	return nil
+}
+
+func (m *mealsRepo) EditReview(ctx context.Context, reviewId int64, customerId int64, req *request.EditReviewRequest) error {
+	edits := 0
+
+	err := m.db.QueryRow(
+		ctx,
+		`SELECT edits FROM reviews WHERE id = $1 AND customer_id = $2 LIMIT 1`,
+		reviewId, customerId,
+	).Scan(&edits)
+	if err != nil {
+		return err
+	}
+
+	if edits >= 5 {
+		return server.NewUserErr(server.MaxReviewReached, "Maximum of 5 review edits")
+	}
+
+	query := `UPDATE reviews SET rating = @rating, comment = @comment, edits = edits + 1, updated_at = @updatedAt
+	WHERE id = @reviewId AND customer_id = @customerId`
+
+	args := pgx.NamedArgs{
+		"rating":     int64(req.Rating),
+		"comment":    req.Comment,
+		"updatedAt":  time.Now(),
+		"reviewId":   reviewId,
+		"customerId": customerId,
+	}
+
+	result, err := m.db.Exec(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("update review: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+
+	return nil
 }

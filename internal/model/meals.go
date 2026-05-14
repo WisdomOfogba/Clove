@@ -67,7 +67,9 @@ type Review struct {
 	MealID         int64     `json:"meal_id"`
 	Rating         int64     `json:"rating"` // 1-5
 	Comment        string    `json:"comment"`
-	Sentiment      string    `json:"sentiment"`
-	SentimentScore float64   `json:"sentiment_score"`
+	Edits          int16     `json:"edits"`
+	Sentiment      *string   `json:"sentiment"`
+	SentimentScore *float64  `json:"sentiment_score"`
 	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }

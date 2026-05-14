@@ -64,11 +64,17 @@ type UpdateOrderStatusRequest struct {
 
 // AddReviewRequest represents adding a review for an order/meal
 type AddReviewRequest struct {
-	MealID   int64  `json:"meal_id" name:"Meal ID" validate:"required,gte=1"`
 	VendorID int64  `json:"vendor_id" name:"Vendor ID" validate:"required,gte=1"`
-	Rating   int    `json:"rating" name:"Rating" validate:"required,gte=0,lte=5"` // 1-5
-	Comment  string `json:"comment" name:"Comment" validate:"required,gte=5"`
+	Rating   int16  `json:"rating" name:"Rating" validate:"required,gte=0,lte=5"` // 1-5
+	Comment  string `json:"comment" name:"Comment"`
 }
+
+type EditReviewRequest struct {
+	ReviewID int64  `json:"review_id" name:"Review ID" validate:"required,gte=1"`
+	Rating   int16  `json:"rating" name:"Rating" validate:"required,gte=0,lte=5"` // 1-5
+	Comment  string `json:"comment" name:"Comment"`
+}
+
 
 // ==================== SEARCH & DISCOVERY ====================
 

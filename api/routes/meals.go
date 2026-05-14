@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/chibx/vendor-pulse/internal/constants"
 	"github.com/chibx/vendor-pulse/internal/db"
@@ -270,5 +271,88 @@ func DeleteMeal() fiber.Handler {
 		}
 
 		return response.WriteResponse(ctx, fiber.StatusOK, "Meal deleted successfully")
+	}
+}
+
+func AddReview() fiber.Handler {
+	err500 := fiber.NewError(fiber.StatusInternalServerError, "Couldn't add your review, please try again")
+	return func(ctx fiber.Ctx) error {
+		mealID := ctx.Params("id")
+		if mealID == "" {
+			return response.FromFiberError(ctx, fiber.ErrBadRequest)
+		}
+
+		reqBody := &request.AddReviewRequest{}
+
+		err := ctx.Bind().Body(reqBody)
+		if err != nil {
+			errorBags := server.ValErrToBag(err)
+			return response.FromFiberError(ctx, fiber.ErrBadRequest, errorBags)
+		}
+
+		customerID := int64(0)
+		if userCtx, ok := ctx.Locals(constants.UserCtxKey).(request.UserCtx); ok {
+			customerID = userCtx.ID
+		}
+		if customerID == 0 {
+			return response.FromFiberError(ctx, fiber.ErrUnauthorized)
+		}
+
+		mealIDInt, err := strconv.ParseInt(mealID, 10, 64)
+		if err != nil {
+			return response.FromFiberError(ctx, fiber.ErrBadRequest)
+		}
+
+		now := time.Now()
+
+		review := &model.Review{
+			CustomerID: customerID,
+			VendorID:   reqBody.VendorID,
+			MealID:     mealIDInt,
+			Rating:     int64(reqBody.Rating),
+			Comment:    reqBody.Comment,
+			Edits:      0,
+			CreatedAt:  now,
+			UpdatedAt:  now,
+		}
+
+		err = db.Meals().AddReview(ctx.Context(), mealIDInt, review)
+		if err != nil {
+			logger.Err(err).Msg("Failed to add review to database")
+			return response.FromFiberError(ctx, err500)
+		}
+
+		// TODO: Integrate AI/ML SDK for sentiment analysis on review.Comment in a background job or service
+		// Calculate Sentiment and SentimentScore based on comment
+
+		return response.WriteResponse(ctx, fiber.StatusCreated, "Review added successfully")
+	}
+}
+
+func EditReview() fiber.Handler {
+	err500 := fiber.NewError(fiber.StatusInternalServerError, "Couldn't edit this review, please try again")
+	return func(ctx fiber.Ctx) error {
+		reqBody := &request.EditReviewRequest{}
+
+		err := ctx.Bind().Body(reqBody)
+		if err != nil {
+			errorBags := server.ValErrToBag(err)
+			return response.FromFiberError(ctx, fiber.ErrBadRequest, errorBags)
+		}
+
+		customerID := int64(0)
+		if userCtx, ok := ctx.Locals(constants.UserCtxKey).(request.UserCtx); ok {
+			customerID = userCtx.ID
+		}
+		if customerID == 0 {
+			return response.FromFiberError(ctx, fiber.ErrUnauthorized)
+		}
+
+		err = db.Meals().EditReview(ctx.Context(), reqBody.ReviewID, customerID, reqBody)
+		if err != nil {
+			return response.FromFiberError(ctx, err500)
+		}
+
+		return response.WriteResponse(ctx, fiber.StatusOK, "Review edited successfully")
 	}
 }
