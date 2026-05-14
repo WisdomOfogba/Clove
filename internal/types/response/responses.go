@@ -2,22 +2,6 @@ package response
 
 import "time"
 
-// ==================== AUTH RESPONSES ====================
-
-// AuthResponse represents authentication success response
-type AuthResponse struct {
-	VendorID string `json:"vendor_id"`
-	Status   string `json:"status"`
-	Token    string `json:"token"`
-}
-
-// AdminAuthResponse represents admin authentication response
-type AdminAuthResponse struct {
-	Token string `json:"token"`
-	Role  string `json:"role"`
-	Name  string `json:"name"`
-}
-
 // ==================== VERIFICATION RESPONSES ====================
 
 // VerdictResponse represents the final AI verification verdict

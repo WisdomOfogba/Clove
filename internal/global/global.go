@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
+	"github.com/shopspring/decimal"
 	pgxUUID "github.com/vgarvardt/pgx-google-uuid/v5"
 )
 
@@ -28,6 +29,13 @@ var (
 	SnowFlake  *snowflake.Node
 	Cloudinary *cloudinary.Cloudinary
 )
+
+func decimalCustomTypeFunc(field reflect.Value) interface{} {
+	if value, ok := field.Interface().(decimal.Decimal); ok {
+		return value.InexactFloat64()
+	}
+	return nil
+}
 
 func TagNameFunc(fld reflect.StructField) string {
 	name := fld.Tag.Get("name")
@@ -142,6 +150,7 @@ func newRedis() *redis.Client {
 
 func InitGlobals() {
 	Validator.RegisterTagNameFunc(TagNameFunc)
+	Validator.RegisterCustomTypeFunc(decimalCustomTypeFunc, decimal.Decimal{})
 	var err error
 	var wg sync.WaitGroup
 	SecretKey = loadKey("SECRET_KEY")

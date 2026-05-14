@@ -10,6 +10,7 @@ type (
 	mealsRepo    struct{ db *pgxpool.Pool }
 	ordersRepo   struct{ db *pgxpool.Pool }
 	paymentsRepo struct{ db *pgxpool.Pool }
+	pulseRepo    struct{ db *pgxpool.Pool }
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 	mealsR    *mealsRepo
 	ordersR   *ordersRepo
 	paymentsR *paymentsRepo
+	pulseR    *pulseRepo
 )
 
 func Users() *usersRepo {
@@ -45,4 +47,11 @@ func Payments() *paymentsRepo {
 		paymentsR = &paymentsRepo{global.DB}
 	}
 	return paymentsR
+}
+
+func VendorPulse() *pulseRepo {
+	if pulseR == nil {
+		pulseR = &pulseRepo{global.DB}
+	}
+	return pulseR
 }

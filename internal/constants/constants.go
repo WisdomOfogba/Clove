@@ -7,7 +7,12 @@ import (
 	"github.com/go-redis/redis_rate/v10"
 )
 
-const APPNAME = "CloveDelight"
+const (
+	APPNAME       = "CloveDelight"
+	FAKE_DELIVERY = 700
+)
+
+var AllowedImages = []string{"image/jpeg", "image/png", "image/webp"}
 
 var PublicFolder = func() string {
 	if folder := os.Getenv("PUBLIC_FOLDER"); folder != "" {

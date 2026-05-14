@@ -84,6 +84,11 @@ func (cust *usersRepo) GetSessionByTokenHash(ctx context.Context, tokenHash stri
 
 func (cust *usersRepo) DeleteSession(ctx context.Context, session *model.UserSession) error {
 	query := `DELETE FROM user_sessions WHERE refresh_token_hash = $1`
-	_, err := cust.db.Exec(ctx, query, session.RefreshTokenHash)
+	args := []any{session.RefreshTokenHash}
+	if session.UserId != 0 {
+		query = query + ` AND user_id = $2`
+		args = append(args, session.UserId)
+	}
+	_, err := cust.db.Exec(ctx, query, args)
 	return err
 }

@@ -12,6 +12,10 @@ const (
 	SessionDiffUserAgent
 )
 
+const (
+	MaxReviewReached UserErrType = iota
+)
+
 type TokenErr struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
