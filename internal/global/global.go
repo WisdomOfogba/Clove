@@ -145,32 +145,32 @@ func newCloudinary() *cloudinary.Cloudinary {
 	return cld
 }
 
-func newRedis() *redis.Client {
-	redisUrl := getEnv("REDIS_URL")
-	opts, err := redis.ParseURL(redisUrl)
-	if err != nil {
-		Logger.Error().Err(err).Msg("failed to parse redis url for catalog service")
-		Logger.Fatal().Msg("REDIS_URL should be set!!!")
-	}
+// func newRedis() *redis.Client {
+// 	redisUrl := getEnv("REDIS_URL")
+// 	opts, err := redis.ParseURL(redisUrl)
+// 	if err != nil {
+// 		Logger.Error().Err(err).Msg("failed to parse redis url for catalog service")
+// 		Logger.Fatal().Msg("REDIS_URL should be set!!!")
+// 	}
 
-	client := redis.NewClient(opts)
+// 	client := redis.NewClient(opts)
 
-	for range 5 {
-		cmd := client.Ping(context.Background())
-		err = cmd.Err()
-		if err != nil {
-			Logger.Error().Err(err).Msg("failed to connect to redis for catalog service")
-		} else {
-			return client
-		}
+// 	for range 5 {
+// 		cmd := client.Ping(context.Background())
+// 		err = cmd.Err()
+// 		if err != nil {
+// 			Logger.Error().Err(err).Msg("failed to connect to redis for catalog service")
+// 		} else {
+// 			return client
+// 		}
 
-		Logger.Debug().Msg("Backing off for 100ms...")
-		time.Sleep(100 * time.Millisecond)
-	}
+// 		Logger.Debug().Msg("Backing off for 100ms...")
+// 		time.Sleep(100 * time.Millisecond)
+// 	}
 
-	Logger.Fatal().Msg("Could not connect to Redis after multiple retries")
-	return nil
-}
+// 	Logger.Fatal().Msg("Could not connect to Redis after multiple retries")
+// 	return nil
+// }
 
 func InitGlobals() {
 	Validator.RegisterTagNameFunc(TagNameFunc)
@@ -185,9 +185,9 @@ func InitGlobals() {
 	wg.Go(func() {
 		DB = newDB()
 	})
-	wg.Go(func() {
-		Redis = newRedis()
-	})
+	// wg.Go(func() {
+	// 	Redis = newRedis()
+	// })
 
 	wg.Go(func() {
 		Cloudinary = newCloudinary()
