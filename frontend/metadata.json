@@ -1,0 +1,6 @@
+{
+  "name": "CloveDelight",
+  "description": "Trust-First food delivery platform featuring Clove AI Proof of Life verification for verified premium vendors.",
+  "requestFramePermissions": ["camera", "geolocation"],
+  "majorCapabilities": []
+}
