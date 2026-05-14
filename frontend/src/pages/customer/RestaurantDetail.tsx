@@ -87,7 +87,7 @@ export function RestaurantDetailPage() {
                   </div>
                   <div className="flex justify-between items-center mt-4">
                     <span className="font-black text-dark text-lg">₦{item.price}</span>
-                    <Button size="sm" onClick={() => addItem({ id: item.id, name: item.name, price: item.price, restaurantId: restaurant.id, restaurantName: restaurant.name })}>
+                    <Button size="sm" onClick={() => addItem({ id: item.id, name: item.name, price: item.price, vendorName: restaurant.name, quantity: 1 })}>
                       Add to Cart
                     </Button>
                   </div>

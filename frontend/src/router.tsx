@@ -29,6 +29,9 @@ import {
   HowItWorksPage,
   NotFoundPage
 } from './pages/Placeholders';
+import VDashboard from './pages/vendor/VDashboard';
+
+const LOGGED_IN = true;
 
 export const router = createBrowserRouter([
   {
@@ -53,10 +56,17 @@ export const router = createBrowserRouter([
       { path: 'vendor/onboarding/step4', element: <Navigate to="/vendor/onboarding" replace /> },
       { path: 'vendor/onboarding/processing', element: <Navigate to="/vendor/onboarding" replace /> },
       { path: 'vendor/onboarding/result', element: <Navigate to="/vendor/onboarding" replace /> },
-      { path: 'vendor/dashboard', element: <VendorDashboard /> },
-      { path: 'vendor/meals', element: <VendorMeals /> },
-      { path: 'vendor/orders', element: <VendorOrders /> },
-      { path: 'vendor/profile', element: <VendorProfile /> },
+      {
+        path: 'vendor/',
+        element: <VDashboard />,
+        children: [
+            { index: true, element: LOGGED_IN ? <Navigate to="/vendor/dashboard" replace /> : <Navigate to="/login" replace /> },
+            { path: 'dashboard', element: <VendorDashboard /> },
+            { path: 'meals', element: <VendorMeals /> },
+            { path: 'orders', element: <VendorOrders /> },
+            { path: 'profile', element: <VendorProfile /> },
+        ]
+      },
       { path: 'admin', element: <AdminDashboard /> },
       { path: 'admin/login', element: <Navigate to="/login" replace /> },
       { path: 'admin/dashboard', element: <AdminDashboard /> },

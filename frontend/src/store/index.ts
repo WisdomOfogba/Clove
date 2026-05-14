@@ -29,7 +29,7 @@ const initialOnboardingData: OnboardingData = {
   step: 1,
   business: { name: '', address: '', phone: '', category: '' },
   legal: { cacNumber: '', ninNumber: '', cacFile: null, ninFile: null },
-  proof: { kitchenPhotos: [], mealPhotos: [], exteriorPhoto: null, location: null, selfie: null },
+  proof: { brandImages: [], brandLogo: null, location: null, selfie: null, identityReference: null },
   status: 'idle',
 };
 

@@ -22,9 +22,9 @@ export interface LegalDocs {
 }
 
 export interface ProofOfLife {
-  kitchenPhotos: string[];
-  mealPhotos: string[];
-  exteriorPhoto: string | null;
+  brandImages: string[];
+  brandLogo: string | null;
+  identityReference: string | null;
   location: { lat: number; lng: number } | null;
   selfie: string | null;
 }

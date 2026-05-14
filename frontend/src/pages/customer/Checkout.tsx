@@ -8,12 +8,12 @@ import { Input } from '../../components/ui/Input';
 import { api } from '../../lib/api';
 
 export function CheckoutPage() {
-  const { total, clearCart, items } = useCart();
+  const { totalPrice, clearCart, items } = useCart();
   const navigate = useNavigate();
   const [showSquadModal, setShowSquadModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const totalAmount = total + 1500; // Adding delivery fee
+  const totalAmount = totalPrice + 1500; // Adding delivery fee
 
   const handlePaymentSuccess = async () => {
     setIsProcessing(true);
@@ -67,7 +67,7 @@ export function CheckoutPage() {
             <h3 className="text-xl font-black text-dark mb-6">Payment</h3>
             
             <div className="py-4 border-y border-muted mb-6 space-y-2 text-sm font-bold text-neutral">
-              <div className="flex justify-between"><span>Subtotal</span><span>₦{total}</span></div>
+              <div className="flex justify-between"><span>Subtotal</span><span>₦{totalPrice}</span></div>
               <div className="flex justify-between"><span>Delivery</span><span>₦1,500</span></div>
             </div>
 

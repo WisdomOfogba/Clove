@@ -6,7 +6,7 @@ import { useCart } from '../../contexts/CartContext';
 import { Button } from '../../components/ui/Button';
 
 export function CartPage() {
-  const { items, removeItem, total, totalItems } = useCart();
+  const { items, removeItem, totalPrice, totalItems } = useCart();
   const navigate = useNavigate();
 
   if (totalItems === 0) {
@@ -37,7 +37,7 @@ export function CartPage() {
               className="bg-white p-4 sm:p-6 rounded-[2rem] border border-muted flex items-center justify-between gap-4"
             >
               <div>
-                <p className="text-xs font-bold text-neutral uppercase tracking-widest mb-1">{item.restaurantName}</p>
+                <p className="text-xs font-bold text-neutral uppercase tracking-widest mb-1">{item.vendorName}</p>
                 <h3 className="text-lg font-black text-dark">{item.name}</h3>
                 <p className="text-primary font-black mt-2">₦{item.price}</p>
               </div>
@@ -60,13 +60,12 @@ export function CartPage() {
         <div className="bg-dark text-white rounded-[2rem] p-8 h-fit sticky top-24">
           <h3 className="text-xl font-black mb-6 border-b border-white/10 pb-4">Order Summary</h3>
           <div className="space-y-4 mb-6 text-sm font-medium text-white/70">
-            <div className="flex justify-between"><span>Subtotal ({totalItems} items)</span><span>₦{total}</span></div>
+            <div className="flex justify-between"><span>Subtotal ({totalItems} items)</span><span>₦{totalPrice}</span></div>
             <div className="flex justify-between"><span>Delivery Fee</span><span>₦1,500</span></div>
-            <div className="flex justify-between"><span>AI Audit Fee</span><span className="text-primary">Covered by Clove</span></div>
           </div>
           <div className="pt-4 border-t border-white/10 flex justify-between items-center mb-8">
             <span className="font-bold text-white/50">Total</span>
-            <span className="text-3xl font-black text-white">₦{total + 1500}</span>
+            <span className="text-3xl font-black text-white">₦{totalPrice + 1500}</span>
           </div>
           
           <Button 
