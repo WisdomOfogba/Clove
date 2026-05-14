@@ -1,20 +1,5 @@
 package request
 
-// ==================== VENDOR REGISTRATION ====================
-
-// RegisterVendorRequest represents vendor registration with all business details
-type RegisterVendorRequest struct {
-	FullName     string `form:"full_name" json:"full_name" name:"Full Name"`
-	Email        string `form:"email" json:"email" name:"Email Address"`
-	Phone        string `form:"phone" json:"phone" name:"Phone Number"`
-	Password     string `form:"password" json:"password" name:"Password"`
-	BusinessName string `form:"business_name" json:"business_name" name:"Business Name"`
-	BusinessType string `form:"business_type" json:"business_type" name:"Business Type"`
-	RCNumber     string `form:"rc_number" json:"rc_number" name:"RC Number"`
-	State        string `form:"state" json:"state" name:"State"`
-	Address      string `form:"address" json:"address" name:"Business Address"`
-}
-
 // ==================== VENDOR PROFILE ====================
 
 // UpdateVendorProfileRequest represents vendor profile update
@@ -32,7 +17,6 @@ type UploadDocumentsRequest struct {
 	DocumentType string `form:"document_type" json:"document_type" name:"Document Type"`
 	// cacCertificate, validId, bankDetails files handled via multipart/form-data
 	NINNumber     string `form:"nin_number" json:"nin_number" name:"NIN Number"`
-	BVNNumber     string `form:"bvn_number" json:"bvn_number" name:"BVN Number"`
 	BankName      string `form:"bank_name" json:"bank_name" name:"Bank Name"`
 	AccountNumber string `form:"account_number" json:"account_number" name:"Account Number"`
 	AccountName   string `form:"account_name" json:"account_name" name:"Account Name"`
@@ -41,7 +25,6 @@ type UploadDocumentsRequest struct {
 // ProofOfLifeRequest represents kitchen/meal photos and GPS location submission
 type ProofOfLifeRequest struct {
 	NINNumber        string  `form:"nin_number" json:"nin_number" name:"NIN Number"`
-	BVNNumber        string  `form:"bvn_number" json:"bvn_number" name:"BVN Number"`
 	BankName         string  `form:"bank_name" json:"bank_name" name:"Bank Name"`
 	AccountNumber    string  `form:"account_number" json:"account_number" name:"Account Number"`
 	AccountName      string  `form:"account_name" json:"account_name" name:"Account Name"`
