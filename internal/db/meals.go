@@ -329,6 +329,7 @@ func (m *mealsRepo) ListReviews(ctx context.Context, mealId int64, pagination ty
 
 	rows, err := m.db.Query(ctx, query, args)
 	if err != nil {
+		global.Logger.Err(err).Msg("Couldn't load reviews from db")
 		return nil, err
 	}
 	defer rows.Close()
@@ -340,6 +341,7 @@ func (m *mealsRepo) ListReviews(ctx context.Context, mealId int64, pagination ty
 			&review.Comment, &review.Edits, &review.CreatedAt, &review.UpdatedAt,
 		)
 		if err != nil {
+			global.Logger.Err(err).Msg("Error scanning into review struct")
 			return nil, fmt.Errorf("scan error: %v", err)
 		}
 		if cap(reviews) <= len(reviews)+1 {

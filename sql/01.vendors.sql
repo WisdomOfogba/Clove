@@ -14,7 +14,7 @@ CREATE TABLE business (
     address TEXT NOT NULL,
     status TEXT NOT NULL,
     vendor_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_business_vendor_id ON business(vendor_id);
@@ -40,7 +40,6 @@ CREATE TABLE vendor_kyc (
     kyc_id TEXT PRIMARY KEY,
     vendor_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     nin_number TEXT NOT NULL,
-    bvn_number TEXT NOT NULL,
     bank_name TEXT NOT NULL,
     account_number TEXT NOT NULL,
     account_name TEXT NOT NULL,

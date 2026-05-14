@@ -17,7 +17,7 @@ type Business struct {
 	TIN          string    `json:"tin"`
 	BusinessType string    `json:"business_type"` // "restaurant", "ecommerce", "food_delivery"
 	RCNumber     string    `json:"rc_number"`     // CAC/RC number
-	NIN          string    `json:"nin"`           // Unique BVN for one store per vendor
+	NIN          string    `json:"nin"`           // Unique NIN for one store per vendor
 	State        string    `json:"state"`
 	Address      string    `json:"address"`
 	Status       string    `json:"status"` // "pending_documents", "documents_received", "payment_pending", "processing", "approved", "restricted", "flagged", "suspended"
@@ -47,7 +47,6 @@ type VendorKYC struct {
 	KYCID            string    `json:"kyc_id"`
 	VendorID         int64     `json:"vendor_id"`
 	NINNumber        string    `json:"nin_number"`
-	BVNNumber        string    `json:"bvn_number"`
 	BankName         string    `json:"bank_name"`
 	AccountNumber    string    `json:"account_number"`
 	AccountName      string    `json:"account_name"`

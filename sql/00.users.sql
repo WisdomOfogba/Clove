@@ -15,7 +15,6 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_bvn ON users(bvn);
 CREATE INDEX idx_users_is_business ON users(is_business);
 
 CREATE TABLE user_sessions (
