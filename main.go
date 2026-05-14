@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/chibx/vendor-pulse/api/routes"
+	"github.com/chibx/vendor-pulse/apis/routes"
 	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"

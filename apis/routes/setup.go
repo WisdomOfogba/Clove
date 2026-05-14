@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/chibx/vendor-pulse/api/middlewares"
+	"github.com/chibx/vendor-pulse/apis/middlewares"
 	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/chibx/vendor-pulse/output"
 	"github.com/gofiber/fiber/v3"
