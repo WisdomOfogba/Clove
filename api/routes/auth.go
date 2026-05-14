@@ -194,6 +194,7 @@ func UpgradeToBusinessAccount() fiber.Handler {
 	// err500 := fiber.NewError(fiber.StatusInternalServerError, "Error occurred while signing you in, please try again")
 
 	return func(ctx fiber.Ctx) error {
+		
 		return nil
 	}
 }

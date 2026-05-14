@@ -311,7 +311,7 @@ func AddReview() fiber.Handler {
 			CustomerID: customerID,
 			VendorID:   reqBody.VendorID,
 			MealID:     mealIDInt,
-			Rating:     int64(reqBody.Rating),
+			Rating:     reqBody.Rating,
 			Comment:    reqBody.Comment,
 			Edits:      0,
 			CreatedAt:  now,
