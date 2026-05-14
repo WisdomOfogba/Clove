@@ -7,9 +7,9 @@ CREATE TABLE business (
     email TEXT NOT NULL,
     password TEXT NOT NULL,
     tin TEXT NOT NULL,
+    nin TEXT NOT NULL UNIQUE,
     business_type TEXT NOT NULL,
     rc_number TEXT NOT NULL,
-    bvn TEXT NOT NULL UNIQUE,
     state TEXT NOT NULL,
     address TEXT NOT NULL,
     status TEXT NOT NULL,
@@ -32,6 +32,7 @@ CREATE TABLE vendor_documents (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
+
 
 CREATE INDEX idx_vendor_documents_vendor_id ON vendor_documents(vendor_id);
 

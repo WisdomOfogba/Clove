@@ -9,7 +9,7 @@ import (
 	"github.com/chibx/vendor-pulse/internal/types/request"
 )
 
-func UserRegisterToDBBackendUser(c context.Context, req *request.RegisterCustomerRequest) (*model.User, error) {
+func UserRegisterToDBBackendUser(c context.Context, req *request.RegisterUserRequest) (*model.User, error) {
 	logger := global.Logger
 
 	passwordHash, err := auth.GenerateHashFromString(req.Password, auth.DefaultHashParams)

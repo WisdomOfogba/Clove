@@ -22,6 +22,7 @@ CREATE TABLE meal_pictures (
     id BIGINT PRIMARY KEY,
     meal_id BIGINT NOT NULL REFERENCES meals(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
+    public_id TEXT NOT NULL,
     is_primary BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL
 );

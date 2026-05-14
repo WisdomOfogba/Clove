@@ -17,7 +17,7 @@ type Business struct {
 	TIN          string    `json:"tin"`
 	BusinessType string    `json:"business_type"` // "restaurant", "ecommerce", "food_delivery"
 	RCNumber     string    `json:"rc_number"`     // CAC/RC number
-	BVN          string    `json:"bvn"`           // Unique BVN for one store per vendor
+	NIN          string    `json:"nin"`           // Unique BVN for one store per vendor
 	State        string    `json:"state"`
 	Address      string    `json:"address"`
 	Status       string    `json:"status"` // "pending_documents", "documents_received", "payment_pending", "processing", "approved", "restricted", "flagged", "suspended"

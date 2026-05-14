@@ -8,7 +8,6 @@ import (
 	"github.com/chibx/vendor-pulse/internal/auth"
 	"github.com/chibx/vendor-pulse/internal/constants"
 	"github.com/chibx/vendor-pulse/internal/db"
-	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/chibx/vendor-pulse/internal/model"
 	server "github.com/chibx/vendor-pulse/internal/server_errors"
 	"github.com/chibx/vendor-pulse/internal/types/request"
@@ -19,14 +18,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-var logger = global.Logger
-
 func UserRegister() fiber.Handler {
 	err500 := fiber.NewError(fiber.StatusInternalServerError, "Error occurred while creating your account, please try again")
 	return func(ctx fiber.Ctx) error {
 		var err error
 		// var errorBag = []serverErrors.ErrorDetail{}
-		userForRegister := &request.RegisterCustomerRequest{}
+		userForRegister := &request.RegisterUserRequest{}
 
 		err = ctx.Bind().Body(userForRegister)
 		if err != nil {
@@ -65,7 +62,7 @@ func UserLogin() fiber.Handler {
 	err500 := fiber.NewError(fiber.StatusInternalServerError, "Error occurred while signing you in, please try again")
 
 	return func(ctx fiber.Ctx) error {
-		userLogin := &request.CustomerLoginRequest{}
+		userLogin := &request.UserLoginRequest{}
 		var err error
 
 		err = ctx.Bind().Body(userLogin)

@@ -27,6 +27,7 @@ type MealPicture struct {
 	ID        int64     `json:"picture_id"`
 	MealID    int64     `json:"meal_id"`
 	ImageURL  string    `json:"image_url"`
+	PublicID  string    `json:"-"`
 	IsPrimary bool      `json:"is_primary"`
 	CreatedAt time.Time `json:"created_at"`
 }

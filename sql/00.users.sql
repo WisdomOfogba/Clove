@@ -10,12 +10,6 @@ CREATE TABLE users (
     status TEXT NOT NULL DEFAULT 'active',
     is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
     is_business BOOLEAN NOT NULL DEFAULT FALSE,
-    business_name TEXT,
-    business_type TEXT,
-    rc_number TEXT,
-    bvn TEXT UNIQUE,
-    state TEXT,
-    address TEXT,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
