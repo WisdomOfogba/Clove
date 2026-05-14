@@ -7,8 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
 	"strings"
+
+	"github.com/gofiber/fiber/v3"
 )
 
 const squadWebhookSignatureHeader = "x-squad-encrypted-body"
@@ -46,13 +47,13 @@ func VerifyWebhookSignature(payload []byte, signatureHeader, secretKey string) (
 
 // ReadWebhookRequest reads the request body and validates the Squad webhook signature.
 // It returns the raw payload, the parsed signature header, and any validation error.
-func ReadWebhookRequest(r *http.Request) ([]byte, string, error) {
-	signature := r.Header.Get(squadWebhookSignatureHeader)
+func ReadWebhookRequest(c fiber.Ctx) ([]byte, string, error) {
+	signature := c.Get(squadWebhookSignatureHeader)
 	if signature == "" {
 		return nil, "", errors.New("missing webhook signature header")
 	}
 
-	payload, err := io.ReadAll(r.Body)
+	payload, err := io.ReadAll(c.Request().BodyStream())
 	if err != nil {
 		return nil, "", err
 	}
@@ -70,7 +71,7 @@ func ParseWebhookNotification(payload []byte) (*WebhookNotification, error) {
 }
 
 // ValidateWebhookRequest reads the webhook request, verifies the signature, and returns the payload.
-func ValidateWebhookRequest(r *http.Request, secretKey string) ([]byte, error) {
+func ValidateWebhookRequest(r fiber.Ctx, secretKey string) ([]byte, error) {
 	payload, signature, err := ReadWebhookRequest(r)
 	if err != nil {
 		return nil, err

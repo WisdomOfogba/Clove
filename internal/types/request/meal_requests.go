@@ -47,7 +47,7 @@ type PlaceOrderRequest struct {
 }
 
 type MakePaymentRequest struct {
-	OrderID string `json:"order_id"`
+	OrderID string `json:"order_id" validate:"required"`
 }
 
 // OrderItem represents an item in the order

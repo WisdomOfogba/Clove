@@ -25,6 +25,11 @@ func (sc *Client) SetEnvironment(useProduction bool) {
 	sc.baseURL = baseURLSandbox
 }
 
+// If useProduction is true, live API is used; otherwise sandbox is used
+func (sc *Client) Secret() string {
+	return sc.apiKey
+}
+
 // ==================== INTERNAL HELPER METHODS ====================
 
 // buildURL constructs the full URL for an endpoint
