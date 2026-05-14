@@ -13,6 +13,7 @@ import (
 	"github.com/chibx/vendor-pulse/internal/global"
 	"github.com/chibx/vendor-pulse/internal/model"
 	server "github.com/chibx/vendor-pulse/internal/server_errors"
+	"github.com/chibx/vendor-pulse/internal/types"
 	"github.com/chibx/vendor-pulse/internal/types/request"
 	"github.com/chibx/vendor-pulse/internal/types/response"
 	"github.com/chibx/vendor-pulse/internal/utils"
@@ -354,5 +355,64 @@ func EditReview() fiber.Handler {
 		}
 
 		return response.WriteResponse(ctx, fiber.StatusOK, "Review edited successfully")
+	}
+}
+
+func ListReviews() fiber.Handler {
+	err500 := fiber.NewError(fiber.StatusInternalServerError, "Couldn't load meal reviews")
+	return func(ctx fiber.Ctx) error {
+		mealID := ctx.Params("id")
+		if mealID == "" {
+			return response.FromFiberError(ctx, fiber.ErrBadRequest)
+		}
+
+		mealIDInt, err := strconv.ParseInt(mealID, 10, 64)
+		if err != nil {
+			return response.FromFiberError(ctx, fiber.ErrBadRequest)
+		}
+
+		page := 1
+		limit := 10
+
+		if q := ctx.Query("page", ""); q != "" {
+			if p, err := strconv.Atoi(q); err == nil && p > 0 {
+				page = p
+			}
+		}
+		if q := ctx.Query("limit", ""); q != "" {
+			if l, err := strconv.Atoi(q); err == nil && l > 0 {
+				limit = l
+			}
+		}
+
+		reviews, err := db.Meals().ListReviews(ctx.Context(), mealIDInt, types.Pagination{Page: uint(page), PageSize: uint(limit)})
+		if err != nil {
+			return response.FromFiberError(ctx, err500)
+		}
+
+		customerID := int64(0)
+		if userCtx, ok := ctx.Locals(constants.UserCtxKey).(request.UserCtx); ok {
+			customerID = userCtx.ID
+		}
+
+		responseReviews := make([]*response.MealReviewResponse, 0, len(reviews))
+		for _, review := range reviews {
+			isOwner := review.CustomerID != 0 && review.CustomerID == customerID
+			responseReviews = append(responseReviews, &response.MealReviewResponse{
+				ReviewID:  review.ID,
+				IsOwner:   isOwner,
+				CanEdit:   isOwner && review.Edits <= 5,
+				Rating:    int(review.Rating),
+				Comment:   review.Comment,
+				CreatedAt: review.CreatedAt,
+				UpdatedAt: review.UpdatedAt,
+			})
+		}
+
+		return response.WriteResponse(ctx, fiber.StatusOK, "Meal reviews loaded successfully", &response.ListMealReviewResponse{
+			Reviews: responseReviews,
+			Total:   len(responseReviews),
+			Page:    page,
+		})
 	}
 }
