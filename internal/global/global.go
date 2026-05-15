@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/snowflake"
+	"github.com/chibx/vendor-pulse/internal/dojah"
 	"github.com/chibx/vendor-pulse/internal/squadco"
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-playground/validator/v10"
@@ -30,6 +31,7 @@ var (
 	Cloudinary  *cloudinary.Cloudinary
 	AIClient    *genai.Client
 	SquadClient *squadco.Client
+	DojahClient *dojah.DojahClient
 )
 
 func decimalCustomTypeFunc(field reflect.Value) interface{} {
@@ -98,7 +100,7 @@ func initGenAI(ctx context.Context) {
 }
 
 func initSquadClient() {
-	isProduction := getEnv("IS_SQUAD_PROD", "0") == "1"
+	isProduction := getEnv("IS_PROD", "0") == "1"
 	apiKey := getEnv("SQUAD_API_KEY")
 	sandboxApiKey := getEnv("SQUAD_SANDBOX_KEY")
 	key := sandboxApiKey
@@ -114,6 +116,23 @@ func initSquadClient() {
 	}
 	client.SetEnvironment(isProduction)
 	SquadClient = client
+}
+
+func initDojahClient() {
+	isProduction := getEnv("IS_PROD", "0") == "1"
+	privateKey := getEnv("DOJAH_PRIVATE_KEY")
+	appId := getEnv("DOJAH_APP_ID")
+
+	client, err := dojah.NewDojahClient(dojah.DojahOption{
+		SecretKey: privateKey,
+		AppID:     appId,
+	})
+	if err != nil {
+		Logger.Fatal().Err(err).Msg("Could not create squadco client")
+		return
+	}
+	client.SetEnvironment(isProduction)
+	DojahClient = client
 }
 
 func newDB() *gorm.DB {
@@ -187,6 +206,8 @@ func InitGlobals() {
 	if err != nil {
 		Logger.Fatal().Err(err).Send()
 	}
+	initSquadClient()
+	initDojahClient()
 	wg.Go(func() {
 		DB = newDB()
 	})
@@ -203,6 +224,4 @@ func InitGlobals() {
 	})
 
 	wg.Wait()
-
-	initSquadClient()
 }
