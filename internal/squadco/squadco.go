@@ -22,6 +22,7 @@ func NewSquadClient(opt SquadOption) (*Client, error) {
 	if len(opt.ApiKey) == 0 {
 		return nil, errors.New("squadco api key is missing")
 	}
+
 	client := &Client{
 		apiKey:     opt.ApiKey,
 		baseURL:    baseURLSandbox,

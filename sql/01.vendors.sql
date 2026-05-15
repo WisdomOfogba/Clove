@@ -24,7 +24,7 @@ CREATE TABLE vendor_documents (
     vendor_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     document_type TEXT NOT NULL,
     document_name TEXT NOT NULL,
-    file_path TEXT NOT NULL,
+    public_id TEXT NOT NULL,
     verification_status TEXT NOT NULL DEFAULT 'pending',
     verified_by TEXT,
     verified_at TIMESTAMP,
