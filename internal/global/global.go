@@ -98,10 +98,15 @@ func initGenAI(ctx context.Context) {
 }
 
 func initSquadClient() {
-	apiKey := getEnv("SQUAD_API_KEY")
 	isProduction := getEnv("IS_SQUAD_PROD", "0") == "1"
+	apiKey := getEnv("SQUAD_API_KEY")
+	sandboxApiKey := getEnv("SQUAD_SANDBOX_KEY")
+	key := sandboxApiKey
+	if isProduction {
+		key = apiKey
+	}
 	client, err := squadco.NewSquadClient(squadco.SquadOption{
-		ApiKey: apiKey,
+		ApiKey: key,
 	})
 	if err != nil {
 		Logger.Fatal().Err(err).Msg("Could not create squadco client")

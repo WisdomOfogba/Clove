@@ -14,7 +14,10 @@ import (
 	"github.com/gofiber/fiber/v3/middleware/static"
 )
 
-var logger = global.Logger
+var (
+	logger              = global.Logger
+	indexPageSize int64 = 0
+)
 
 func validateFileType(file *multipart.FileHeader, allowed []string) error {
 	f, err := file.Open()
@@ -69,4 +72,31 @@ func AddRoutes(app *fiber.App) {
 	app.Get("/*", static.New("", static.Config{
 		FS: sub,
 	}))
+
+	app.Get("*", func(ctx fiber.Ctx) error {
+		ctx.Set(fiber.HeaderContentType, "text/html")
+
+		fileBytes, err := sub.Open("index.html")
+		if err != nil {
+			logger.Err(err).Any("fs", output.EmbedFS).Msg("")
+			return fiber.ErrNotFound
+		}
+
+		if indexPageSize == 0 {
+			stats, err := fileBytes.Stat()
+			if err != nil {
+				logger.Err(err).Msg("Could not read file stats")
+				return fiber.ErrNotFound
+			}
+			indexPageSize = stats.Size()
+		}
+		b := make([]byte, indexPageSize)
+		_, err = fileBytes.Read(b)
+		if err != nil {
+			logger.Err(err).Msg("Failed to read index.html bytes")
+			return fiber.ErrNotFound
+		}
+
+		return ctx.Send(b)
+	})
 }

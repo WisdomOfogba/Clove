@@ -21,8 +21,16 @@ type Business struct {
 	State        string    `json:"state" gorm:"column:state;not null"`
 	Address      string    `json:"address" gorm:"column:address;not null"`
 	Status       string    `json:"status" gorm:"column:status;not null"` // "pending_documents", "documents_received", "payment_pending", "processing", "approved", "restricted", "flagged", "suspended"
-	VendorID     int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_business_vendor_id"`
+	VendorID     int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index"`
 	CreatedAt    time.Time `json:"created_at" gorm:"column:created_at;not null;default:CURRENT_TIMESTAMP"`
+}
+
+type VendorReview struct {
+	ID          int64
+	VendorID    string
+	Comment     string
+	RatingRatio float64
+	Score       float64
 }
 
 // ==================== DOCUMENTS & KYC ====================
@@ -30,7 +38,7 @@ type Business struct {
 // VendorDocument represents documents submitted for verification
 type VendorDocument struct {
 	DocumentID         string     `json:"document_id" gorm:"column:document_id;primaryKey"`
-	VendorID           int64      `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_vendor_documents_vendor_id"`
+	VendorID           int64      `json:"vendor_id" gorm:"column:vendor_id;not null;index"`
 	DocumentType       string     `json:"document_type" gorm:"column:document_type;not null"` // "cac_certificate", "valid_id", "bank_details", "business_photo", "product_photo", "exterior_photo", "selfie_photo"
 	DocumentName       string     `json:"document_name" gorm:"column:document_name;not null"`
 	FilePath           string     `json:"file_path" gorm:"column:file_path;not null"`
@@ -62,12 +70,12 @@ type VendorKYC struct {
 // VendorVerification represents the main verification record with AI scoring
 type VendorVerification struct {
 	VerificationID   string     `json:"verification_id" gorm:"column:verification_id;primaryKey"`
-	VendorID         int64      `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_vendor_verifications_vendor_id"`
-	TrustScore       float64    `json:"trust_score" gorm:"column:trust_score;not null;default:0"`    // 0-100, updated based on interactions
+	VendorID         int64      `json:"vendor_id" gorm:"column:vendor_id;not null;index"`
+	TrustScore       float64    `json:"trust_score" gorm:"column:trust_score;not null;default:0"`     // 0-100, updated based on interactions
 	InitialScore     float64    `json:"initial_score" gorm:"column:initial_score;not null;default:0"` // Initial score granted after registration
-	Verdict          string     `json:"verdict" gorm:"column:verdict;not null"`                      // "approved", "restricted", "flagged"
-	BreakdownJSON    string     `json:"breakdown_json" gorm:"column:breakdown_json;type:jsonb"`      // JSON-encoded breakdown
-	Flags            string     `json:"flags" gorm:"column:flags;type:jsonb"`                        // JSON-encoded array
+	Verdict          string     `json:"verdict" gorm:"column:verdict;not null"`                       // "approved", "restricted", "flagged"
+	BreakdownJSON    string     `json:"breakdown_json" gorm:"column:breakdown_json;type:jsonb"`       // JSON-encoded breakdown
+	Flags            string     `json:"flags" gorm:"column:flags;type:jsonb"`                         // JSON-encoded array
 	VerdictReason    string     `json:"verdict_reason" gorm:"column:verdict_reason"`
 	ValidationStatus string     `json:"validation_status" gorm:"column:validation_status;not null;default:'pending'"` // "pending", "processing", "complete", "failed"
 	JobID            string     `json:"job_id,omitempty" gorm:"column:job_id"`
@@ -82,10 +90,10 @@ type VendorVerification struct {
 // VerificationJob tracks async verification processing
 type VerificationJob struct {
 	JobID            string    `json:"job_id" gorm:"column:job_id;primaryKey"`
-	VendorID         int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_verification_jobs_vendor_id"`
-	Status           string    `json:"status" gorm:"column:status;not null;default:'pending'"`       // "pending", "processing", "complete", "failed"
-	CurrentStep      string    `json:"current_step" gorm:"column:current_step"`                     // "cac_check", "nin_check", "image_analysis", "score_fusion"
-	StepsJSON        string    `json:"steps_json" gorm:"column:steps_json;type:jsonb"`              // JSON-encoded step statuses
+	VendorID         int64     `json:"vendor_id" gorm:"column:vendor_id;not null;index"`
+	Status           string    `json:"status" gorm:"column:status;not null;default:'pending'"` // "pending", "processing", "complete", "failed"
+	CurrentStep      string    `json:"current_step" gorm:"column:current_step"`                // "cac_check", "nin_check", "image_analysis", "score_fusion"
+	StepsJSON        string    `json:"steps_json" gorm:"column:steps_json;type:jsonb"`         // JSON-encoded step statuses
 	ErrorMessage     *string   `json:"error_message,omitempty" gorm:"column:error_message"`
 	Result           *string   `json:"result,omitempty" gorm:"column:result"`
 	EstimatedSeconds int       `json:"estimated_seconds" gorm:"column:estimated_seconds;not null;default:0"`
@@ -98,11 +106,11 @@ type VerificationJob struct {
 // PaymentTransaction tracks verification fee payments
 type PaymentTransaction struct {
 	TransactionID       string          `json:"transaction_id" gorm:"column:transaction_id;primaryKey"`
-	VendorID            int64           `json:"vendor_id" gorm:"column:vendor_id;not null;index:idx_payment_transactions_vendor_id"`
-	TransactionRef      string          `json:"transaction_ref" gorm:"column:transaction_ref;not null;index:idx_payment_transactions_transaction_ref"`
-	Amount              decimal.Decimal `json:"amount" gorm:"column:amount;not null"`           // in kobo
-	Currency            string          `json:"currency" gorm:"column:currency;not null;default:'NGN'"`         // "NGN"
-	Status              string          `json:"status" gorm:"column:status;not null;default:'pending'"`           // "pending", "success", "failed"
+	VendorID            int64           `json:"vendor_id" gorm:"column:vendor_id;not null;index"`
+	TransactionRef      string          `json:"transaction_ref" gorm:"column:transaction_ref;not null;index"`
+	Amount              decimal.Decimal `json:"amount" gorm:"column:amount;not null"`                     // in kobo
+	Currency            string          `json:"currency" gorm:"column:currency;not null;default:'NGN'"`   // "NGN"
+	Status              string          `json:"status" gorm:"column:status;not null;default:'pending'"`   // "pending", "success", "failed"
 	TransactionType     string          `json:"transaction_type" gorm:"column:transaction_type;not null"` // "verification_fee", "payout"
 	SquadCheckoutURL    *string         `json:"squad_checkout_url,omitempty" gorm:"column:squad_checkout_url"`
 	SquadTransactionRef *string         `json:"squad_transaction_ref,omitempty" gorm:"column:squad_transaction_ref"`
